@@ -1401,21 +1401,43 @@
       }
       function loadWhisper(){
         if(S.whisperPipe) return Promise.resolve(S.whisperPipe);
-        return new Promise(function(res, rej){
-          function go(){
-            try{
-              var T=window.Transformers;
-              if(!T){ rej(new Error("AI library load hoy ni")); return; }
-              T.env.allowLocalModels=false;
-              T.pipeline("automatic-speech-recognition","Xenova/whisper-tiny.en").then(function(p){ S.whisperPipe=p; res(p); }).catch(rej);
-            }catch(e){ rej(e); }
+        if(S._whisperPromise) return S._whisperPromise;
+        /* @xenova/transformers-er dist file-ta ekta ES module (seshe `export{...}`
+           thake) — normal <script src> diye load korle browser seta parse-i korte
+           pare na, tai window.Transformers kokhonoi set hoy na ar "AI library load
+           hoy ni" error asto. Tai ekhane dynamic import() diye module hishebe
+           load kora hocche — etai ei library-r sothik browser loading path. */
+        var libPromise;
+        if(window.Transformers && typeof window.Transformers.pipeline==="function"){
+          libPromise=Promise.resolve(window.Transformers);
+        }else{
+          libPromise=import("https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js")
+            .catch(function(err){
+              throw new Error("AI library download hoy ni — net check kore abar try koro"+(err && err.message ? " ("+err.message+")" : ""));
+            });
+        }
+        S._whisperPromise=libPromise.then(function(T){
+          if(!T || typeof T.pipeline!=="function"){
+            throw new Error("AI library load hoy ni — library-r pipeline pawa jay ni");
           }
-          if(window.Transformers){ go(); return; }
-          var sc=document.createElement("script");
-          sc.src="https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js";
-          sc.onload=go; sc.onerror=function(){ rej(new Error("AI library download hoy ni — net check koro")); };
-          document.head.appendChild(sc);
+          try{
+            T.env.allowLocalModels=false;
+            T.env.allowRemoteModels=true;
+            /* Cross-origin-isolated na hole (Vercel / iframe) threaded WASM cholbe
+               na — single thread force korle sob jaygay model run kore. */
+            if(T.env.backends && T.env.backends.onnx && T.env.backends.onnx.wasm){
+              T.env.backends.onnx.wasm.numThreads=1;
+            }
+          }catch(e){ /* env sajano na geleo pipeline chesta cholbe */ }
+          return T.pipeline("automatic-speech-recognition","Xenova/whisper-tiny.en");
+        }).then(function(pipe){
+          S.whisperPipe=pipe;
+          return pipe;
+        }).catch(function(err){
+          S._whisperPromise=null; /* fail hole porer click-e abar try hobe */
+          throw err;
         });
+        return S._whisperPromise;
       }
       $("autoCapBtn").addEventListener("click", function(){
         var st=$("capStatus"), btn=$("autoCapBtn");
