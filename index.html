@@ -1,0 +1,1467 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Fahim — Clip Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <style>
+      :root{
+        color-scheme: light dark;
+        --bg:#eceee9; --bg2:#e2e5de; --panel:#f8f9f6; --panel2:#eef0ea; --ink:#14161a; --ink2:#565b52;
+        --line:#cfd3c8; --line2:#bcc1b2;
+        --accent:#e8480c; --accent-ink:#fff;
+        --lime:#5d8a00; --lime-bg:#e6f2c4;
+        --stage:#0c0d0f; --stage-ink:#f4f4f0;
+        --track-v:#2f6df6; --track-a:#7a9a2e; --track-c:#e8480c;
+        --danger:#c62f1d; --ok:#3f7d12;
+        --shadow:0 10px 30px rgba(20,22,26,.14);
+        --r:10px;
+      }
+      @media (prefers-color-scheme: dark){
+        :root{
+          --bg:#0e0f11; --bg2:#121316; --panel:#17181c; --panel2:#1e2025; --ink:#f2f2ec; --ink2:#a6a99e;
+          --line:#2b2d33; --line2:#3a3d45;
+          --accent:#ff5a26; --accent-ink:#14100c;
+          --lime:#c6f24e; --lime-bg:#26330f;
+          --stage:#060607; --stage-ink:#f4f4f0;
+          --track-v:#4d84ff; --track-a:#9dc33f; --track-c:#ff5a26;
+          --danger:#ff6a55; --ok:#a5dd6e;
+          --shadow:0 10px 30px rgba(0,0,0,.5);
+        }
+      }
+      *{box-sizing:border-box}
+      html,body{margin:0;padding:0}
+      body{
+        background:var(--bg); color:var(--ink);
+        font-family:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif;
+        font-size:15px; line-height:1.45;
+        -webkit-font-smoothing:antialiased;
+      }
+      .mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+      button,[role="button"],select,summary,input:not([type="checkbox"],[type="radio"]){min-height:2.25rem}
+      button{font:inherit;cursor:pointer}
+      :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+      /* ---------- top bar ---------- */
+      .topbar{
+        position:sticky;top:0;z-index:40;
+        display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+        padding:10px 14px;background:var(--panel);border-bottom:1px solid var(--line);
+      }
+      .brand{display:flex;align-items:baseline;gap:9px;margin-right:auto}
+      .brand .name{font-weight:900;font-size:24px;letter-spacing:-.02em;line-height:1}
+      .brand .name em{font-style:normal;color:var(--accent)}
+      .brand .tag{font-size:12px;color:var(--ink2);font-weight:600;letter-spacing:.04em}
+      .topbar .group{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+      .topbar label{font-size:12px;font-weight:700;color:var(--ink2)}
+      select,input[type="text"],input[type="number"],textarea{
+        font:inherit;color:var(--ink);background:var(--panel2);
+        border:1px solid var(--line2);border-radius:8px;padding:7px 10px;
+      }
+      select{max-width:100%}
+      .btn{
+        display:inline-flex;align-items:center;justify-content:center;gap:7px;
+        border:1px solid var(--line2);background:var(--panel2);color:var(--ink);
+        border-radius:8px;padding:8px 14px;font-weight:700;font-size:14px;min-height:38px;
+      }
+      .btn:hover{border-color:var(--ink2)}
+      .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+      .btn.primary:hover{filter:brightness(1.07)}
+      .btn.small{padding:5px 10px;min-height:36px;font-size:13px}
+      .btn.danger{color:var(--danger)}
+      .btn[disabled]{opacity:.45;cursor:not-allowed}
+      .btn.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+      /* ---------- layout ---------- */
+      .layout{
+        display:grid;gap:12px;padding:12px;
+        grid-template-columns:300px minmax(0,1fr) 320px;
+        grid-template-areas:"left center right";
+        align-items:start;max-width:1720px;margin:0 auto;
+      }
+      .col-left{grid-area:left}.col-center{grid-area:center;min-width:0}.col-right{grid-area:right}
+      .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:12px}
+      .panel h2{font-size:13px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;margin:0 0 4px}
+      .panel h3{font-size:14px;font-weight:800;margin:14px 0 6px}
+      .panel .sub{font-size:13px;color:var(--ink2);margin:0 0 10px}
+      .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+      .stack{display:grid;gap:8px}
+      .grow{flex:1 1 auto;min-width:0}
+      .tiny{font-size:12px;color:var(--ink2)}
+      .status{font-size:13px;min-height:1.2em}
+      .status.err{color:var(--danger)} .status.ok{color:var(--ok)}
+
+      /* ---------- dropzone ---------- */
+      .drop{
+        border:2px dashed var(--line2);border-radius:var(--r);padding:20px 14px;text-align:center;
+        background:var(--panel2);transition:border-color .15s,background .15s;
+      }
+      .drop.over{border-color:var(--accent);background:var(--panel)}
+      .drop .big{font-weight:800;font-size:16px;margin:6px 0 2px}
+      .drop svg{width:34px;height:34px;stroke:var(--accent)}
+      .filemeta{font-size:13px;margin-top:10px;text-align:left;display:none}
+      .filemeta div{display:flex;justify-content:space-between;gap:8px;padding:2px 0}
+      .filemeta span:first-child{color:var(--ink2)}
+
+      /* ---------- AI clip cards ---------- */
+      .clipcard{
+        border:1px solid var(--line);border-radius:8px;padding:10px;background:var(--panel2);
+        display:grid;gap:4px;text-align:left;width:100%;color:var(--ink);font:inherit;cursor:pointer;
+      }
+      .clipcard:hover{border-color:var(--ink2)}
+      .clipcard .top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+      .clipcard .t{font-weight:800;font-size:14px}
+      .score{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:12px;background:var(--lime-bg);color:var(--lime);border-radius:20px;padding:2px 9px;white-space:nowrap}
+      .silence-list{font-size:13px}
+      .silence-list li{margin:3px 0}
+
+      /* ---------- library ---------- */
+      .libitem{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--panel2);width:100%;text-align:left;color:var(--ink);cursor:pointer;font:inherit}
+      .libitem:hover{border-color:var(--ink2)}
+      .libitem .thumb{width:64px;height:40px;object-fit:cover;border-radius:5px;background:#000;flex:none}
+      .libitem .nm{font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      .libitem .mt{font-size:12px;color:var(--ink2)}
+
+      /* ---------- stage ---------- */
+      .stagewrap{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+      .stage{
+        position:relative;margin:0 auto;background:var(--stage);border-radius:8px;overflow:hidden;
+        width:100%;transition:max-width .2s;
+      }
+      .stage[data-fmt="9:16"]{aspect-ratio:9/16;max-width:340px}
+      .stage[data-fmt="16:9"]{aspect-ratio:16/9;max-width:760px}
+      .stage[data-fmt="1:1"]{aspect-ratio:1/1;max-width:480px}
+      .stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000}
+      .stage .empty{
+        position:absolute;inset:0;display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center;
+        color:var(--stage-ink);text-align:center;padding:20px;
+      }
+      .stage .empty .b{font-weight:800;font-size:18px}
+      .stage .empty .s{font-size:13px;opacity:.65;max-width:300px}
+      .capoverlay{
+        position:absolute;left:0;right:0;padding:0 6%;text-align:center;pointer-events:none;z-index:3;
+        font-weight:800;line-height:1.25;overflow-wrap:break-word;
+      }
+      .capoverlay.pos-bottom{bottom:7%}
+      .capoverlay.pos-center{top:50%;transform:translateY(-50%)}
+      .capoverlay.pos-top{top:6%}
+      .capoverlay .w{padding:0 .12em;border-radius:.18em}
+      .capoverlay .w.hot{background:#ffd21f;color:#111}
+      .capoverlay.bg .w{background:rgba(0,0,0,.55)}
+      .capoverlay.anim-pop .w.hot{display:inline-block;animation:pop .18s ease-out}
+      .capoverlay.anim-fade{animation:fadein .25s ease-out}
+      @keyframes pop{from{transform:scale(1.35)}to{transform:scale(1)}}
+      @keyframes fadein{from{opacity:.2}to{opacity:1}}
+      @media (prefers-reduced-motion: reduce){
+        .capoverlay.anim-pop .w.hot{animation:none}
+        .capoverlay.anim-fade{animation:none}
+      }
+      .wm{
+        position:absolute;right:10px;bottom:10px;z-index:2;color:#fff;opacity:.55;font-weight:700;font-size:12px;
+        pointer-events:none;text-shadow:0 1px 3px rgba(0,0,0,.6);display:none;
+      }
+      .transport{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px}
+      .transport .time{font-family:"IBM Plex Mono",monospace;font-size:13px;font-weight:600}
+      .iconbtn{width:40px;height:40px;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;border:1px solid var(--line2);background:var(--panel2);color:var(--ink)}
+      .iconbtn svg{width:18px;height:18px}
+      input[type="range"]{accent-color:var(--accent);min-height:2.25rem}
+      .seekrow{display:flex;align-items:center;gap:10px;margin-top:6px}
+      .seekrow input{flex:1}
+
+      /* ---------- timeline ---------- */
+      .timeline{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-top:12px}
+      .tl-head{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+      .tl-head h2{font-size:13px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;margin:0}
+      .tl-body{position:relative;user-select:none}
+      .tl-row{display:grid;grid-template-columns:74px 1fr;gap:8px;align-items:stretch;margin-bottom:6px}
+      .tl-label{font-size:11px;font-weight:800;letter-spacing:.05em;color:var(--ink2);display:flex;align-items:center;text-transform:uppercase}
+      .tl-track{position:relative;height:44px;background:var(--panel2);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+      .tl-track.audio{height:38px}.tl-track.caps{height:34px}
+      .seg{position:absolute;top:3px;bottom:3px;border-radius:4px;background:var(--track-v);opacity:.85;color:#fff;font-size:11px;font-weight:700;padding:3px 6px;overflow:hidden;white-space:nowrap;cursor:pointer;border:2px solid transparent}
+      .seg.sel{border-color:#fff;opacity:1;box-shadow:0 0 0 1px var(--ink)}
+      .inout{position:absolute;top:0;bottom:0;background:rgba(127,127,127,.28);pointer-events:none}
+      .capblock{position:absolute;top:4px;bottom:4px;border-radius:4px;background:var(--track-c);opacity:.85;color:#fff;font-size:10px;font-weight:700;padding:2px 5px;overflow:hidden;white-space:nowrap;cursor:pointer;border:2px solid transparent}
+      .capblock.sel{border-color:#fff;opacity:1}
+      .playhead{position:absolute;top:0;bottom:0;width:2px;background:var(--accent);z-index:5;pointer-events:none}
+      .playhead::before{content:"";position:absolute;top:-1px;left:-5px;border:6px solid transparent;border-top:7px solid var(--accent)}
+      #waveCanvas{position:absolute;inset:0;width:100%;height:100%}
+      .sil{position:absolute;top:0;bottom:0;background:rgba(198,47,29,.25);pointer-events:none}
+
+      /* ---------- right panel tabs ---------- */
+      .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+      .tab{flex:1 1 auto;border:1px solid var(--line2);background:var(--panel2);color:var(--ink);border-radius:8px;padding:8px 6px;font-weight:800;font-size:13px;min-height:38px}
+      .tab[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+      .tabpage{display:none}.tabpage.show{display:block}
+      .field{margin-bottom:12px}
+      .field>label{display:block;font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);margin-bottom:5px}
+      .field .val{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink2)}
+      .field input[type="range"]{width:100%}
+      .duo{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+      .check{display:flex;gap:9px;align-items:flex-start;padding:7px 0;cursor:pointer;font-size:14px}
+      .check input{width:20px;height:20px;margin:1px 0 0;accent-color:var(--accent);flex:none}
+      .check small{display:block;color:var(--ink2);font-size:12px}
+      .chips{display:flex;gap:6px;flex-wrap:wrap}
+      .chip{border:1px solid var(--line2);background:var(--panel2);color:var(--ink);border-radius:20px;padding:6px 13px;font-weight:700;font-size:13px;min-height:36px}
+      .chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+      .preset-table{width:100%;border-collapse:collapse;font-size:13px}
+      .preset-table td,.preset-table th{padding:7px 6px;border-bottom:1px solid var(--line);text-align:left}
+      .preset-table th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2)}
+      .preset-table button{all:unset;cursor:pointer;font-weight:700;color:var(--accent);padding:6px 2px;display:inline-block;min-height:20px}
+      progress{width:100%;height:14px;accent-color:var(--accent)}
+      .exportbox{display:none}
+      .exportbox.show{display:block}
+
+      /* ---------- caption editor ---------- */
+      .capitem{border:1px solid var(--line);border-radius:8px;padding:9px;background:var(--panel2);display:grid;gap:6px}
+      .capitem.sel{border-color:var(--accent)}
+      .capitem textarea{width:100%;resize:vertical;min-height:44px}
+      .capitem .times{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+      .capitem .times input{width:86px}
+      .swatches{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+      .sw{width:34px;height:34px;border-radius:8px;border:2px solid var(--line2);cursor:pointer;padding:0}
+      .sw[aria-pressed="true"]{border-color:var(--ink)}
+      input[type="color"]{width:44px;height:36px;padding:2px;border:1px solid var(--line2);border-radius:8px;background:var(--panel2)}
+
+      footer{padding:6px 16px 26px;color:var(--ink2);font-size:12.5px;max-width:1720px;margin:0 auto}
+
+      @media (max-width:1080px){
+        .layout{grid-template-columns:280px minmax(0,1fr);grid-template-areas:"left center" "right right"}
+        .col-right{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+        .col-right .panel{margin-bottom:0}
+      }
+      @media (max-width:760px){
+        .layout{grid-template-columns:minmax(0,1fr);grid-template-areas:"center" "left" "right";padding:8px}
+        .col-right{display:block}
+        .col-right .panel{margin-bottom:12px}
+        .brand .tag{display:none}
+        .tl-row{grid-template-columns:58px 1fr}
+        .tl-label{font-size:10px}
+        .tab{font-size:12px;padding:8px 3px}
+        .stage[data-fmt="9:16"]{max-width:300px}
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="name">FAHIM<em>.</em></span>
+        <span class="tag">CLIP STUDIO — HYBRID AI + MANUAL EDITOR</span>
+      </div>
+      <div class="group">
+        <label for="presetSel">Preset</label>
+        <select id="presetSel" aria-label="Social media preset">
+          <option value="tiktok">TikTok · 9:16</option>
+          <option value="shorts">YouTube Shorts · 9:16</option>
+          <option value="reels">Instagram Reels · 9:16</option>
+          <option value="yt">YouTube Video · 16:9</option>
+          <option value="igpost">Instagram Post · 1:1</option>
+        </select>
+      </div>
+      <div class="group">
+        <label for="resSel">Export</label>
+        <select id="resSel" aria-label="Export resolution">
+          <option value="720">720p</option>
+          <option value="1080" selected>1080p</option>
+          <option value="2160">4K</option>
+        </select>
+        <select id="fpsSel" aria-label="Export frame rate">
+          <option value="30" selected>30 FPS</option>
+          <option value="60">60 FPS</option>
+        </select>
+        <button class="btn primary" id="exportTopBtn" type="button">Export clip</button>
+      </div>
+    </header>
+
+    <div class="layout">
+      <!-- ============ LEFT ============ -->
+      <div class="col-left">
+        <section class="panel" aria-labelledby="upH">
+          <h2 id="upH">Upload video</h2>
+          <p class="sub">File upload diye koro — MP4, MOV, WebM. Drag &amp; drop o chole.</p>
+          <div class="drop" id="dropZone">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4m0 0 4 4m-4-4L8 8"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+            <div class="big">Drop video here</div>
+            <div class="tiny">Podcast, stream, gameplay — lomba video theke short clip.</div>
+            <div style="margin-top:12px"><button class="btn primary" id="browseBtn" type="button">Browse files</button></div>
+            <input type="file" id="fileInput" accept="video/*,.mp4,.mov,.webm,.mkv" hidden />
+          </div>
+          <div class="filemeta" id="fileMeta">
+            <div><span>File</span><strong class="mono" id="fmName">—</strong></div>
+            <div><span>Duration</span><strong class="mono" id="fmDur">—</strong></div>
+            <div><span>Size</span><strong class="mono" id="fmSize">—</strong></div>
+            <div><span>Source size</span><strong class="mono" id="fmRes">—</strong></div>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="aiH">
+          <h2 id="aiH">AI clipping</h2>
+          <p class="sub">Video-r audio energy analyse kore loud, exciting moment gula khuje dey — gameplay kill, hashi, jore kotha. Score toto beshi, moment toto strong.</p>
+          <div class="stack">
+            <button class="btn primary" id="aiScanBtn" type="button" disabled>Find best moments</button>
+            <p class="status" id="aiStatus" role="status"></p>
+            <div class="stack" id="aiClips"></div>
+          </div>
+          <h3>Silence</h3>
+          <p class="sub" style="margin-bottom:6px">Nirob ongsho khuje ber kore — chaile playback-e skip kore dibe.</p>
+          <div class="stack">
+            <button class="btn" id="silenceBtn" type="button" disabled>Detect silences</button>
+            <label class="check"><input type="checkbox" id="skipSilence" /> <span>Skip silences while playing<small>Preview ar export — dutotei nirob ongsho bad jabe.</small></span></label>
+            <ul class="silence-list" id="silenceList"></ul>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="libH">
+          <h2 id="libH">Video library</h2>
+          <p class="sub">Ei session-e upload kora project gula.</p>
+          <div class="stack" id="libList">
+            <p class="tiny" id="libEmpty">Ekhono kono video upload hoy ni.</p>
+          </div>
+        </section>
+      </div>
+
+      <!-- ============ CENTER ============ -->
+      <div class="col-center">
+        <section class="stagewrap" aria-labelledby="prevH">
+          <h2 id="prevH" class="tiny" style="letter-spacing:.09em;text-transform:uppercase;font-size:12px;margin:0 0 10px">Preview · <span id="fmtLabel">9:16 · 1080 × 1920</span></h2>
+          <div class="stage" id="stage" data-fmt="9:16">
+            <video id="vid" playsinline preload="metadata"></video>
+            <div class="empty" id="stageEmpty">
+              <div class="b">No video yet</div>
+              <div class="s">Left theke ekta video upload koro — preview, timeline ar caption shob ekhane live hobe.</div>
+            </div>
+            <div class="capoverlay pos-bottom" id="capOverlay" aria-hidden="true"></div>
+            <div class="wm" id="wmOverlay">Fahim</div>
+          </div>
+          <div class="transport">
+            <button class="iconbtn" id="backBtn" type="button" aria-label="Back 5 seconds"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"/></svg></button>
+            <button class="iconbtn" id="playBtn" type="button" aria-label="Play or pause"><svg id="playIco" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></button>
+            <button class="iconbtn" id="fwdBtn" type="button" aria-label="Forward 5 seconds"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M13 17l5-5-5-5M6 17l5-5-5-5"/></svg></button>
+            <span class="time"><span id="tCur">0:00.0</span> / <span id="tDur">0:00.0</span></span>
+            <span class="grow"></span>
+            <label class="tiny" for="volSlider">Volume</label>
+            <input type="range" id="volSlider" min="0" max="100" value="90" style="width:110px" />
+            <label class="check" style="padding:0"><input type="checkbox" id="loopChk" /> <span>Loop clip</span></label>
+          </div>
+          <div class="seekrow">
+            <span class="tiny mono" id="inLabel">IN 0:00.0</span>
+            <input type="range" id="seekBar" min="0" max="1000" value="0" aria-label="Seek" />
+            <span class="tiny mono" id="outLabel">OUT 0:00.0</span>
+          </div>
+        </section>
+
+        <section class="timeline" aria-labelledby="tlH">
+          <div class="tl-head">
+            <h2 id="tlH">Timeline</h2>
+            <div class="row">
+              <button class="btn small" id="setInBtn" type="button">Set In [</button>
+              <button class="btn small" id="setOutBtn" type="button">Set Out ]</button>
+              <button class="btn small" id="splitBtn" type="button">Split at playhead</button>
+              <button class="btn small" id="resetTrimBtn" type="button">Full range</button>
+            </div>
+          </div>
+          <div class="tl-body" id="tlBody">
+            <div class="tl-row"><div class="tl-label">Video</div><div class="tl-track" id="videoTrack"></div></div>
+            <div class="tl-row"><div class="tl-label">Audio</div><div class="tl-track audio" id="audioTrack"><canvas id="waveCanvas"></canvas></div></div>
+            <div class="tl-row"><div class="tl-label">Captions</div><div class="tl-track caps" id="capTrack"></div></div>
+            <div class="playhead" id="playhead" style="left:74px"></div>
+          </div>
+          <p class="tiny" style="margin:8px 0 0">Clip block-e click korle oi ongsho select hobe. Caption block-e click korle caption editor-e khulbe. Timeline-e click korle seek hobe.</p>
+        </section>
+      </div>
+
+      <!-- ============ RIGHT ============ -->
+      <div class="col-right">
+        <div>
+          <div class="tabs" role="tablist" aria-label="Editor panels">
+            <button class="tab" role="tab" id="tab-edit" aria-selected="true" data-page="page-edit" type="button">Edit</button>
+            <button class="tab" role="tab" id="tab-caps" aria-selected="false" data-page="page-caps" type="button">Captions</button>
+            <button class="tab" role="tab" id="tab-audio" aria-selected="false" data-page="page-audio" type="button">Audio</button>
+            <button class="tab" role="tab" id="tab-export" aria-selected="false" data-page="page-export" type="button">Export</button>
+          </div>
+
+          <!-- EDIT -->
+          <section class="panel tabpage show" id="page-edit" role="tabpanel" aria-labelledby="tab-edit">
+            <h2>Format &amp; resize</h2>
+            <p class="sub">Shob size-i ache — Shorts, Reels, TikTok, YouTube, Post.</p>
+            <div class="chips" id="fmtChips">
+              <button class="chip" data-fmt="9:16" aria-pressed="true" type="button">9:16 Vertical</button>
+              <button class="chip" data-fmt="16:9" aria-pressed="false" type="button">16:9 Wide</button>
+              <button class="chip" data-fmt="1:1" aria-pressed="false" type="button">1:1 Square</button>
+            </div>
+            <h3>Trim</h3>
+            <div class="field">
+              <label for="trimStart">Start <span class="val" id="trimStartVal">0:00.0</span></label>
+              <input type="range" id="trimStart" min="0" max="100" step="0.1" value="0" />
+            </div>
+            <div class="field">
+              <label for="trimEnd">End <span class="val" id="trimEndVal">0:00.0</span></label>
+              <input type="range" id="trimEnd" min="0" max="100" step="0.1" value="0" />
+            </div>
+            <p class="tiny">Clip length: <strong class="mono" id="clipLen">0:00.0</strong></p>
+            <h3>Speed</h3>
+            <div class="chips" id="speedChips">
+              <button class="chip" data-speed="0.5" aria-pressed="false" type="button">0.5× Slow</button>
+              <button class="chip" data-speed="0.75" aria-pressed="false" type="button">0.75×</button>
+              <button class="chip" data-speed="1" aria-pressed="true" type="button">1× Normal</button>
+              <button class="chip" data-speed="1.5" aria-pressed="false" type="button">1.5×</button>
+              <button class="chip" data-speed="2" aria-pressed="false" type="button">2× Fast</button>
+            </div>
+            <h3>Zoom &amp; crop</h3>
+            <div class="field">
+              <label for="zoomSlider">Zoom <span class="val" id="zoomVal">100%</span></label>
+              <input type="range" id="zoomSlider" min="100" max="300" value="100" />
+            </div>
+            <label class="check"><input type="checkbox" id="reframeChk" checked /> <span>Auto Reframe<small>16:9 video-ke 9:16 frame-e centre crop kore subject majhkhane rakhe.</small></span></label>
+            <label class="check"><input type="checkbox" id="faceChk" /> <span>Face-priority crop<small>Crop-ta frame-er uporer dike bias kore — talking-head/podcast video-te mukh shadharonoto uporei thake. Eta automatic face detection na.</small></span></label>
+            <h3>Filter</h3>
+            <div class="chips" id="filterChips">
+              <button class="chip" data-filter="none" aria-pressed="true" type="button">None</button>
+              <button class="chip" data-filter="vivid" aria-pressed="false" type="button">Vivid</button>
+              <button class="chip" data-filter="warm" aria-pressed="false" type="button">Warm</button>
+              <button class="chip" data-filter="cool" aria-pressed="false" type="button">Cool</button>
+              <button class="chip" data-filter="mono" aria-pressed="false" type="button">B&amp;W</button>
+              <button class="chip" data-filter="dark" aria-pressed="false" type="button">Moody</button>
+            </div>
+            <h3>Transition</h3>
+            <div class="field">
+              <label for="transSel">Clip shuru-te</label>
+              <select id="transSel" style="width:100%">
+                <option value="none">None</option>
+                <option value="fade" selected>Fade in</option>
+                <option value="zoom">Zoom punch-in</option>
+                <option value="slide">Slide up</option>
+              </select>
+            </div>
+          </section>
+
+          <!-- CAPTIONS -->
+          <section class="panel tabpage" id="page-caps" role="tabpanel" aria-labelledby="tab-caps">
+            <h2>Auto captions</h2>
+            <p class="sub">Video-r audio theke Whisper AI diye subtitle banay — shob browser-er bhitorei chole, model prothombar download hobe (~40 MB). Tarpor prottek line edit kora jay.</p>
+            <div class="stack">
+              <button class="btn primary" id="autoCapBtn" type="button" disabled>Generate auto captions</button>
+              <p class="status" id="capStatus" role="status"></p>
+            </div>
+            <h3>Transcript theke captions</h3>
+            <p class="sub" style="margin-bottom:6px">Nijer transcript thakle paste koro — clip-er somoy onujayi line vag kore word-by-word caption baniye dibe.</p>
+            <textarea id="transcriptBox" rows="3" placeholder="Ekhane transcript paste koro…" style="width:100%"></textarea>
+            <div style="margin-top:8px"><button class="btn" id="transcriptBtn" type="button">Captions from transcript</button></div>
+            <h3>Caption style</h3>
+            <div class="field">
+              <label for="capFont">Font</label>
+              <select id="capFont" style="width:100%">
+                <option value="'Archivo',sans-serif">Archivo Bold</option>
+                <option value="Arial,sans-serif">Arial</option>
+                <option value="'Arial Black',Arial,sans-serif">Arial Black</option>
+                <option value="Georgia,serif">Georgia</option>
+                <option value="'Courier New',monospace">Courier Mono</option>
+                <option value="Impact,sans-serif">Impact</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="capSize">Font size <span class="val" id="capSizeVal">30</span></label>
+              <input type="range" id="capSize" min="16" max="64" value="30" />
+            </div>
+            <div class="field">
+              <label>Colour</label>
+              <div class="swatches" id="capSwatches">
+                <button class="sw" data-color="#ffffff" style="background:#ffffff" aria-pressed="true" aria-label="White" type="button"></button>
+                <button class="sw" data-color="#ffd21f" style="background:#ffd21f" aria-pressed="false" aria-label="Yellow" type="button"></button>
+                <button class="sw" data-color="#c6f24e" style="background:#c6f24e" aria-pressed="false" aria-label="Lime" type="button"></button>
+                <button class="sw" data-color="#ff5a26" style="background:#ff5a26" aria-pressed="false" aria-label="Orange" type="button"></button>
+                <button class="sw" data-color="#57c8ff" style="background:#57c8ff" aria-pressed="false" aria-label="Sky" type="button"></button>
+                <input type="color" id="capColorPick" value="#ffffff" aria-label="Custom caption colour" />
+              </div>
+            </div>
+            <div class="duo">
+              <div class="field">
+                <label for="capPos">Position</label>
+                <select id="capPos" style="width:100%">
+                  <option value="bottom" selected>Bottom</option>
+                  <option value="center">Centre</option>
+                  <option value="top">Top</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="capAnim">Animation</label>
+                <select id="capAnim" style="width:100%">
+                  <option value="karaoke" selected>Word highlight</option>
+                  <option value="pop">Pop</option>
+                  <option value="fade">Fade</option>
+                  <option value="none">None</option>
+                </select>
+              </div>
+            </div>
+            <label class="check"><input type="checkbox" id="capBg" checked /> <span>Dark background behind words<small>Caption pora shohoj hoy, bishesh kore gameplay video-te.</small></span></label>
+            <label class="check"><input type="checkbox" id="capShow" checked /> <span>Show captions in preview</span></label>
+            <h3>Caption lines</h3>
+            <div class="row" style="margin-bottom:8px">
+              <button class="btn small" id="addCapBtn" type="button">+ Add line at playhead</button>
+              <button class="btn small" id="micBtn" type="button">🎙 Dictate line</button>
+            </div>
+            <div class="stack" id="capList">
+              <p class="tiny" id="capEmpty">Ekhono caption nai. Auto captions chalao, transcript paste koro, ba nije line add koro.</p>
+            </div>
+          </section>
+
+          <!-- AUDIO -->
+          <section class="panel tabpage" id="page-audio" role="tabpanel" aria-labelledby="tab-audio">
+            <h2>Audio</h2>
+            <div class="field">
+              <label for="volSlider2">Clip volume <span class="val" id="volVal2">90%</span></label>
+              <input type="range" id="volSlider2" min="0" max="100" value="90" />
+            </div>
+            <div class="duo">
+              <div class="field">
+                <label for="fadeIn">Fade in (sec)</label>
+                <input type="number" id="fadeIn" min="0" max="5" step="0.5" value="0.5" style="width:100%" />
+              </div>
+              <div class="field">
+                <label for="fadeOut">Fade out (sec)</label>
+                <input type="number" id="fadeOut" min="0" max="5" step="0.5" value="0.5" style="width:100%" />
+              </div>
+            </div>
+            <label class="check"><input type="checkbox" id="enhanceChk" /> <span>Voice enhancement<small>Export-e halka compressor — kotha clear shona jay.</small></span></label>
+            <label class="check"><input type="checkbox" id="denoiseChk" /> <span>Noise reduction<small>Export-e high-pass filter — fan/hiss-er moto low noise kate.</small></span></label>
+            <h3>Background music</h3>
+            <p class="sub" style="margin-bottom:6px">Nijer music file (MP3) add korle clip-er niche bajbe. Preview-te shona jabe na, export-e mishbe.</p>
+            <div class="row">
+              <button class="btn" id="musicBtn" type="button">Add music file</button>
+              <input type="file" id="musicInput" accept="audio/*" hidden />
+              <span class="tiny" id="musicName">No music added</span>
+            </div>
+            <div class="field" style="margin-top:10px">
+              <label for="musicVol">Music volume <span class="val" id="musicVolVal">25%</span></label>
+              <input type="range" id="musicVol" min="0" max="100" value="25" />
+            </div>
+            <h3>Sound effect</h3>
+            <div class="row">
+              <button class="btn small" id="sfxBtn" type="button">▶ Play whoosh at export start</button>
+              <label class="check" style="padding:0"><input type="checkbox" id="sfxChk" /> <span>Whoosh SFX on</span></label>
+            </div>
+          </section>
+
+          <!-- EXPORT -->
+          <section class="panel tabpage" id="page-export" role="tabpanel" aria-labelledby="tab-export">
+            <h2>Export &amp; download</h2>
+            <p class="sub">Browser-ei render hoy — trim, speed, filter, zoom, caption (burned-in) ar audio shoho. Somoy lagbe clip-er doirgho onujayi, karon real-time-e record hoy.</p>
+            <div class="field">
+              <label for="resSel2">Resolution</label>
+              <select id="resSel2" style="width:100%">
+                <option value="720">720p HD</option>
+                <option value="1080" selected>1080p Full HD</option>
+                <option value="2160">4K Ultra HD</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="fpsSel2">Frame rate</label>
+              <select id="fpsSel2" style="width:100%">
+                <option value="30" selected>30 FPS</option>
+                <option value="60">60 FPS</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="fileName">File name</label>
+              <input type="text" id="fileName" value="fahim-clip" style="width:100%" />
+            </div>
+            <label class="check"><input type="checkbox" id="wmChk" /> <span>Watermark<small>Frame-er corner-e naam boshe.</small></span></label>
+            <div class="field" id="wmTextField" style="display:none">
+              <label for="wmText">Watermark text</label>
+              <input type="text" id="wmText" value="Fahim" style="width:100%" />
+            </div>
+            <div class="stack">
+              <button class="btn primary" id="exportBtn" type="button">Export this clip</button>
+              <button class="btn" id="exportAllBtn" type="button">Export all AI clips</button>
+              <p class="tiny">“Export all” prottek AI clip ekta kore file baniye por por download korbe.</p>
+            </div>
+            <div class="exportbox" id="exportBox">
+              <h3 style="margin-top:14px">Rendering…</h3>
+              <progress id="exportProg" value="0" max="100"></progress>
+              <p class="status" id="exportStatus" role="status"></p>
+              <div class="row">
+                <button class="btn small danger" id="cancelExportBtn" type="button">Cancel</button>
+                <a class="btn primary small" id="dlLink" href="#" download style="display:none;text-decoration:none">Download video</a>
+              </div>
+            </div>
+            <h3>Social presets</h3>
+            <table class="preset-table">
+              <thead><tr><th>Platform</th><th>Format</th><th></th></tr></thead>
+              <tbody>
+                <tr><td>YouTube Shorts</td><td class="mono">9:16</td><td><button data-preset="shorts" type="button">Use</button></td></tr>
+                <tr><td>Instagram Reels</td><td class="mono">9:16</td><td><button data-preset="reels" type="button">Use</button></td></tr>
+                <tr><td>TikTok</td><td class="mono">9:16</td><td><button data-preset="tiktok" type="button">Use</button></td></tr>
+                <tr><td>YouTube Video</td><td class="mono">16:9</td><td><button data-preset="yt" type="button">Use</button></td></tr>
+                <tr><td>Instagram Post</td><td class="mono">1:1</td><td><button data-preset="igpost" type="button">Use</button></td></tr>
+              </tbody>
+            </table>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      Fahim Clip Studio — hybrid editor: AI moment detection + manual editing + auto captions. Shob processing tomar browser-ei hoy; video kothao upload hoy na. Export MP4 format-ei hoy: Chrome/Edge-e direct MP4 record, onno browser-e in-page converter diye MP4 banano hoy.
+    </footer>
+
+    <script>
+    (function(){
+      "use strict";
+      var $ = function(id){ return document.getElementById(id); };
+      var vid = $("vid");
+
+      /* ---------------- state ---------------- */
+      var S = {
+        url:null, name:"", duration:0, vw:0, vh:0,
+        inT:0, outT:0, speed:1, zoom:1, filter:"none", transition:"fade",
+        fmt:"9:16", preset:"tiktok",
+        segments:[], silences:[], aiClips:[],
+        captions:[], selCap:-1, selSeg:-1,
+        capStyle:{ font:"'Archivo',sans-serif", size:30, color:"#ffffff", pos:"bottom", anim:"karaoke", bg:true, show:true },
+        musicBuf:null, musicName:"", audioCtx:null, mediaSrc:null, exporting:false, cancelExport:false,
+        peaks:null, whisperPipe:null
+      };
+      var FILTERS = {
+        none:"none", vivid:"saturate(1.5) contrast(1.08)", warm:"sepia(.32) saturate(1.25) hue-rotate(-8deg)",
+        cool:"saturate(1.1) hue-rotate(14deg) brightness(1.03)", mono:"grayscale(1) contrast(1.1)", dark:"brightness(.82) contrast(1.18) saturate(.9)"
+      };
+      var PRESETS = { tiktok:"9:16", shorts:"9:16", reels:"9:16", yt:"16:9", igpost:"1:1" };
+
+      function fmtT(t){
+        if(!isFinite(t)||t<0) t=0;
+        var m=Math.floor(t/60), s=t-m*60;
+        return m+":"+(s<10?"0":"")+s.toFixed(1);
+      }
+      function fmtSize(b){
+        if(b>1048576) return (b/1048576).toFixed(1)+" MB";
+        if(b>1024) return (b/1024).toFixed(0)+" KB";
+        return b+" B";
+      }
+      function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+
+      /* ---------------- tabs ---------------- */
+      var tabs = document.querySelectorAll(".tab");
+      function showTab(pageId){
+        tabs.forEach(function(t){ t.setAttribute("aria-selected", t.getAttribute("data-page")===pageId ? "true":"false"); });
+        document.querySelectorAll(".tabpage").forEach(function(p){ p.classList.toggle("show", p.id===pageId); });
+      }
+      tabs.forEach(function(t){ t.addEventListener("click", function(){ showTab(t.getAttribute("data-page")); }); });
+
+      /* ---------------- upload ---------------- */
+      var drop=$("dropZone"), fileInput=$("fileInput");
+      $("browseBtn").addEventListener("click", function(){ fileInput.click(); });
+      drop.addEventListener("click", function(e){ if(e.target.id!=="browseBtn") fileInput.click(); });
+      ["dragenter","dragover"].forEach(function(ev){ drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.add("over"); }); });
+      ["dragleave","drop"].forEach(function(ev){ drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.remove("over"); }); });
+      drop.addEventListener("drop", function(e){
+        var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+        if(f) loadFile(f);
+      });
+      fileInput.addEventListener("change", function(){ if(fileInput.files[0]) loadFile(fileInput.files[0]); });
+
+      var libItems = [];
+      function loadFile(f){
+        if(S.url) URL.revokeObjectURL(S.url);
+        S.url = URL.createObjectURL(f);
+        S.name = f.name;
+        vid.src = S.url;
+        vid.load();
+        $("fmName").textContent = f.name;
+        $("fmSize").textContent = fmtSize(f.size);
+        $("fileMeta").style.display = "block";
+        S.segments = []; S.silences = []; S.aiClips = []; S.captions = []; S.selCap=-1; S.peaks=null;
+        $("aiClips").innerHTML=""; $("silenceList").innerHTML=""; $("aiStatus").textContent="";
+        $("capStatus").textContent=""; renderCapList(); drawWave();
+        libItems.unshift({ name:f.name, size:f.size, url:S.url, file:f });
+        renderLib();
+      }
+      function renderLib(){
+        var list=$("libList"); list.innerHTML="";
+        if(!libItems.length){ list.innerHTML='<p class="tiny">Ekhono kono video upload hoy ni.</p>'; return; }
+        libItems.forEach(function(it, i){
+          var b=document.createElement("button"); b.type="button"; b.className="libitem";
+          var th=document.createElement("video"); th.className="thumb"; th.src=it.url; th.muted=true; th.preload="metadata";
+          var wrap=document.createElement("div"); wrap.className="grow"; wrap.style.minWidth="0";
+          var nm=document.createElement("div"); nm.className="nm"; nm.textContent=it.name;
+          var mt=document.createElement("div"); mt.className="mt"; mt.textContent=fmtSize(it.size)+(i===0?" · current project":"");
+          wrap.appendChild(nm); wrap.appendChild(mt);
+          b.appendChild(th); b.appendChild(wrap);
+          b.addEventListener("click", function(){
+            if(it.url!==S.url){ vid.src=it.url; S.url=it.url; S.name=it.name; vid.load(); $("fmName").textContent=it.name; $("fmSize").textContent=fmtSize(it.size); $("fileMeta").style.display="block"; }
+          });
+          list.appendChild(b);
+        });
+      }
+
+      vid.addEventListener("loadedmetadata", function(){
+        S.duration = vid.duration || 0;
+        S.vw = vid.videoWidth; S.vh = vid.videoHeight;
+        S.inT = 0; S.outT = S.duration;
+        S.segments = S.duration>0 ? [{start:0,end:S.duration}] : [];
+        $("fmDur").textContent = fmtT(S.duration);
+        $("fmRes").textContent = S.vw+" × "+S.vh;
+        $("tDur").textContent = fmtT(S.duration);
+        $("stageEmpty").style.display="none";
+        $("aiScanBtn").disabled=false; $("silenceBtn").disabled=false; $("autoCapBtn").disabled=false;
+        var ts=$("trimStart"), te=$("trimEnd");
+        ts.max=S.duration; te.max=S.duration; ts.value=0; te.value=S.duration;
+        syncTrimUI(); renderSegments(); updatePlayhead(); decodePeaks();
+      });
+
+      /* ---------------- format / presets ---------------- */
+      function outDims(){
+        var res = parseInt($("resSel").value,10);
+        if(S.fmt==="9:16") return { w: res, h: Math.round(res*16/9) };
+        if(S.fmt==="1:1") return { w: res, h: res };
+        return { w: Math.round(res*16/9), h: res };
+      }
+      function setFormat(f){
+        S.fmt=f; $("stage").setAttribute("data-fmt", f);
+        document.querySelectorAll("#fmtChips .chip").forEach(function(c){ c.setAttribute("aria-pressed", c.getAttribute("data-fmt")===f?"true":"false"); });
+        var d=outDims(); $("fmtLabel").textContent = f+" · "+d.w+" × "+d.h;
+      }
+      document.querySelectorAll("#fmtChips .chip").forEach(function(c){
+        c.addEventListener("click", function(){ setFormat(c.getAttribute("data-fmt")); });
+      });
+      function setPreset(p){
+        S.preset=p; $("presetSel").value=p; setFormat(PRESETS[p]);
+      }
+      $("presetSel").addEventListener("change", function(){ setPreset(this.value); });
+      document.querySelectorAll("[data-preset]").forEach(function(b){
+        b.addEventListener("click", function(){ setPreset(b.getAttribute("data-preset")); showTab("page-edit"); });
+      });
+      function syncRes(v){ $("resSel").value=v; $("resSel2").value=v; setFormat(S.fmt); }
+      function syncFps(v){ $("fpsSel").value=v; $("fpsSel2").value=v; }
+      $("resSel").addEventListener("change", function(){ syncRes(this.value); });
+      $("resSel2").addEventListener("change", function(){ syncRes(this.value); });
+      $("fpsSel").addEventListener("change", function(){ syncFps(this.value); });
+      $("fpsSel2").addEventListener("change", function(){ syncFps(this.value); });
+
+      /* ---------------- transport ---------------- */
+      var playIco=$("playIco");
+      function setPlayIcon(){ playIco.innerHTML = vid.paused ? '<path d="M8 5v14l11-7z"/>' : '<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>'; }
+      $("playBtn").addEventListener("click", function(){
+        if(!S.url) return;
+        if(vid.paused){ if(vid.currentTime>=S.outT-0.05) vid.currentTime=S.inT; vid.play(); } else vid.pause();
+      });
+      vid.addEventListener("play", setPlayIcon); vid.addEventListener("pause", setPlayIcon);
+      $("backBtn").addEventListener("click", function(){ vid.currentTime=Math.max(0,vid.currentTime-5); });
+      $("fwdBtn").addEventListener("click", function(){ vid.currentTime=Math.min(S.duration,vid.currentTime+5); });
+      $("seekBar").addEventListener("input", function(){
+        if(S.duration>0) vid.currentTime = (this.value/1000)*S.duration;
+      });
+      function setVolume(v){
+        vid.volume = v/100;
+        $("volSlider").value=v; $("volSlider2").value=v; $("volVal2").textContent=v+"%";
+      }
+      $("volSlider").addEventListener("input", function(){ setVolume(+this.value); });
+      $("volSlider2").addEventListener("input", function(){ setVolume(+this.value); });
+
+      function silenceAt(t){
+        for(var i=0;i<S.silences.length;i++){ if(t>=S.silences[i].start && t<S.silences[i].end-0.15) return S.silences[i]; }
+        return null;
+      }
+      vid.addEventListener("timeupdate", function(){
+        var t=vid.currentTime;
+        if($("skipSilence").checked && !vid.paused){
+          var sil=silenceAt(t); if(sil) vid.currentTime=sil.end;
+        }
+        if(!vid.paused && t>=S.outT){
+          if($("loopChk").checked){ vid.currentTime=S.inT; }
+          else { vid.pause(); }
+        }
+        $("tCur").textContent=fmtT(t);
+        if(S.duration>0) $("seekBar").value=Math.round(t/S.duration*1000);
+        updatePlayhead(); updateCaptionOverlay();
+      });
+
+      /* ---------------- trim / segments ---------------- */
+      function syncTrimUI(){
+        $("trimStartVal").textContent=fmtT(S.inT);
+        $("trimEndVal").textContent=fmtT(S.outT);
+        $("inLabel").textContent="IN "+fmtT(S.inT);
+        $("outLabel").textContent="OUT "+fmtT(S.outT);
+        $("clipLen").textContent=fmtT(Math.max(0,S.outT-S.inT));
+        $("trimStart").value=S.inT; $("trimEnd").value=S.outT;
+        renderInOut();
+      }
+      $("trimStart").addEventListener("input", function(){ S.inT=Math.min(+this.value, S.outT-0.2); syncTrimUI(); });
+      $("trimEnd").addEventListener("input", function(){ S.outT=Math.max(+this.value, S.inT+0.2); syncTrimUI(); });
+      $("setInBtn").addEventListener("click", function(){ S.inT=vid.currentTime; if(S.outT<S.inT+0.2)S.outT=Math.min(S.duration,S.inT+0.2); syncTrimUI(); });
+      $("setOutBtn").addEventListener("click", function(){ S.outT=vid.currentTime; if(S.inT>S.outT-0.2)S.inT=Math.max(0,S.outT-0.2); syncTrimUI(); });
+      $("resetTrimBtn").addEventListener("click", function(){ S.inT=0; S.outT=S.duration; syncTrimUI(); });
+
+      function renderSegments(){
+        var track=$("videoTrack"); track.querySelectorAll(".seg,.inout").forEach(function(n){ n.remove(); });
+        if(S.duration<=0) return;
+        var io=document.createElement("div"); io.className="inout";
+        io.style.left=(S.inT/S.duration*100)+"%"; io.style.width=((S.outT-S.inT)/S.duration*100)+"%";
+        io.style.background="transparent"; io.style.boxShadow="inset 0 0 0 2px var(--accent)";
+        track.appendChild(io);
+        S.segments.forEach(function(sg,i){
+          var d=document.createElement("div"); d.className="seg"+(i===S.selSeg?" sel":"");
+          d.style.left=(sg.start/S.duration*100)+"%"; d.style.width=(Math.max(0.4,(sg.end-sg.start)/S.duration*100))+"%";
+          d.textContent="Clip "+(i+1)+" · "+fmtT(sg.end-sg.start);
+          d.addEventListener("click", function(ev){
+            ev.stopPropagation(); S.selSeg=i; S.inT=sg.start; S.outT=sg.end; vid.currentTime=sg.start; syncTrimUI(); renderSegments();
+          });
+          track.appendChild(d);
+        });
+      }
+      function renderInOut(){ renderSegments(); renderCapTrack(); }
+      $("splitBtn").addEventListener("click", function(){
+        var t=vid.currentTime;
+        for(var i=0;i<S.segments.length;i++){
+          var sg=S.segments[i];
+          if(t>sg.start+0.1 && t<sg.end-0.1){
+            S.segments.splice(i,1,{start:sg.start,end:t},{start:t,end:sg.end});
+            S.selSeg=i+1; renderSegments(); return;
+          }
+        }
+      });
+
+      /* timeline seek + playhead */
+      function tlSeek(e){
+        if(S.duration<=0) return;
+        var track=$("videoTrack").getBoundingClientRect();
+        var x=(e.clientX-track.left)/track.width;
+        vid.currentTime=clamp(x,0,1)*S.duration;
+      }
+      ["videoTrack","audioTrack","capTrack"].forEach(function(id){
+        $(id).addEventListener("click", function(e){ if(e.target===this||e.target.id==="waveCanvas") tlSeek(e); });
+      });
+      function updatePlayhead(){
+        if(S.duration<=0) return;
+        var body=$("tlBody").getBoundingClientRect();
+        var track=$("videoTrack").getBoundingClientRect();
+        var x=(track.left-body.left)+(vid.currentTime/S.duration)*track.width;
+        $("playhead").style.left=x+"px";
+      }
+      window.addEventListener("resize", function(){ updatePlayhead(); drawWave(); });
+
+      /* ---------------- speed / zoom / filter ---------------- */
+      document.querySelectorAll("#speedChips .chip").forEach(function(c){
+        c.addEventListener("click", function(){
+          S.speed=+c.getAttribute("data-speed"); vid.playbackRate=S.speed;
+          document.querySelectorAll("#speedChips .chip").forEach(function(x){ x.setAttribute("aria-pressed", x===c?"true":"false"); });
+        });
+      });
+      function applyZoom(){
+        $("zoomVal").textContent=Math.round(S.zoom*100)+"%";
+        vid.style.transform="scale("+S.zoom+")";
+      }
+      $("zoomSlider").addEventListener("input", function(){ S.zoom=+this.value/100; applyZoom(); });
+      function applyFilter(){ vid.style.filter=FILTERS[S.filter]||"none"; }
+      document.querySelectorAll("#filterChips .chip").forEach(function(c){
+        c.addEventListener("click", function(){
+          S.filter=c.getAttribute("data-filter"); applyFilter();
+          document.querySelectorAll("#filterChips .chip").forEach(function(x){ x.setAttribute("aria-pressed", x===c?"true":"false"); });
+        });
+      });
+      $("transSel").addEventListener("change", function(){ S.transition=this.value; });
+      $("faceChk").addEventListener("change", function(){ vid.style.objectPosition = this.checked ? "center 22%" : "center 50%"; });
+
+      /* ---------------- audio analysis: peaks, AI moments, silence ---------------- */
+      function decodePeaks(){
+        if(!S.url) return;
+        fetch(S.url).then(function(r){ return r.arrayBuffer(); }).then(function(buf){
+          var AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+          var ctx=new AC();
+          return ctx.decodeAudioData(buf).then(function(ab){
+            var ch=ab.getChannelData(0), n=240, peaks=[];
+            var per=Math.max(1,Math.floor(ch.length/n));
+            for(var i=0;i<n;i++){
+              var mx=0; for(var j=0;j<per;j+=Math.max(1,Math.floor(per/60))){ var v=Math.abs(ch[i*per+j]||0); if(v>mx)mx=v; }
+              peaks.push(mx);
+            }
+            S.peaks=peaks; drawWave(); ctx.close();
+          });
+        }).catch(function(){});
+      }
+      function drawWave(){
+        var cv=$("waveCanvas"); if(!cv) return;
+        var track=$("audioTrack"); var w=track.clientWidth, h=track.clientHeight;
+        if(w<10) return;
+        var dpr=window.devicePixelRatio||1;
+        cv.width=w*dpr; cv.height=h*dpr;
+        var g=cv.getContext("2d"); g.scale(dpr,dpr);
+        var dark=window.matchMedia("(prefers-color-scheme: dark)").matches;
+        g.clearRect(0,0,w,h);
+        track.querySelectorAll(".sil").forEach(function(n){ n.remove(); });
+        if(S.peaks){
+          g.fillStyle=dark?"#9dc33f":"#7a9a2e";
+          var bw=w/S.peaks.length;
+          for(var i=0;i<S.peaks.length;i++){
+            var ph=Math.max(2,S.peaks[i]*(h-6));
+            g.fillRect(i*bw+0.5,(h-ph)/2,Math.max(1,bw-1),ph);
+          }
+        } else {
+          g.fillStyle=dark?"#555":"#aaa"; g.font="11px sans-serif"; g.fillText("Waveform — video load hole ashbe",8,h/2+4);
+        }
+        if(S.duration>0){
+          S.silences.forEach(function(s){
+            var d=document.createElement("div"); d.className="sil";
+            d.style.left=(s.start/S.duration*100)+"%"; d.style.width=((s.end-s.start)/S.duration*100)+"%";
+            track.appendChild(d);
+          });
+        }
+      }
+      $("silenceBtn").addEventListener("click", function(){
+        if(!S.peaks||S.duration<=0){ $("silenceList").innerHTML="<li>Age video load hok, waveform ashle abar try koro.</li>"; return; }
+        var sil=[], runStart=-1, per=S.duration/S.peaks.length;
+        for(var i=0;i<S.peaks.length;i++){
+          var quiet=S.peaks[i]<0.045;
+          if(quiet && runStart<0) runStart=i;
+          if((!quiet||i===S.peaks.length-1) && runStart>=0){
+            var a=runStart*per, b=(quiet&&i===S.peaks.length-1? i+1 : i)*per;
+            if(b-a>=0.7) sil.push({start:a,end:b});
+            runStart=-1;
+          }
+        }
+        S.silences=sil; drawWave();
+        var ul=$("silenceList"); ul.innerHTML="";
+        if(!sil.length){ ul.innerHTML="<li>0.7 sec+ lomba silence pawa jay ni.</li>"; return; }
+        sil.slice(0,12).forEach(function(s){
+          var li=document.createElement("li"); li.className="mono";
+          li.textContent=fmtT(s.start)+" → "+fmtT(s.end)+"  ("+(s.end-s.start).toFixed(1)+"s)";
+          ul.appendChild(li);
+        });
+        if(sil.length>12){ var li2=document.createElement("li"); li2.textContent="…aro "+(sil.length-12)+" ta"; ul.appendChild(li2); }
+      });
+
+      $("aiScanBtn").addEventListener("click", function(){
+        var st=$("aiStatus");
+        if(!S.peaks||S.duration<=0){ st.textContent="Age video load hok — waveform ready hole scan cholbe."; st.className="status err"; return; }
+        st.textContent="Audio analyse hocche…"; st.className="status";
+        setTimeout(function(){
+          var per=S.duration/S.peaks.length, win=Math.max(3,Math.round(4/per));
+          var scored=[];
+          for(var i=0;i<S.peaks.length;i++){
+            var sum=0; for(var j=0;j<win;j++){ sum+=S.peaks[Math.min(S.peaks.length-1,i+j)]||0; }
+            scored.push({i:i, e:sum/win});
+          }
+          scored.sort(function(a,b){ return b.e-a.e; });
+          var picks=[];
+          for(var k=0;k<scored.length && picks.length<5;k++){
+            var c=scored[k].i*per;
+            var clash=picks.some(function(p){ return Math.abs(p.center-c)<25; });
+            if(!clash) picks.push({center:c, e:scored[k].e});
+          }
+          picks.sort(function(a,b){ return a.center-b.center; });
+          var maxE=Math.max.apply(null, picks.map(function(p){ return p.e; }).concat([0.01]));
+          S.aiClips=picks.map(function(p,idx){
+            var len=clamp(12+Math.round(p.e/maxE*18),12,30);
+            var start=clamp(p.center-len*0.35,0,Math.max(0,S.duration-len));
+            return { start:start, end:Math.min(S.duration,start+len), score:Math.round(62+(p.e/maxE)*37),
+                     title:"Moment "+(idx+1)+" · "+fmtT(start) };
+          });
+          var box=$("aiClips"); box.innerHTML="";
+          if(!S.aiClips.length){ st.textContent="Kono strong moment pawa gelo na."; return; }
+          S.aiClips.forEach(function(c,idx){
+            var b=document.createElement("button"); b.type="button"; b.className="clipcard";
+            b.innerHTML='<span class="top"><span class="t"></span><span class="score"></span></span><span class="tiny"></span>';
+            b.querySelector(".t").textContent="🔥 "+c.title;
+            b.querySelector(".score").textContent="Viral score "+c.score;
+            b.querySelector(".tiny").textContent=fmtT(c.start)+" → "+fmtT(c.end)+" · "+(c.end-c.start).toFixed(0)+"s clip · click korle editor-e load hobe";
+            b.addEventListener("click", function(){
+              S.inT=c.start; S.outT=c.end; setFormat("9:16"); $("presetSel").value="tiktok";
+              vid.currentTime=c.start; syncTrimUI(); vid.play();
+            });
+            box.appendChild(b);
+          });
+          st.textContent=S.aiClips.length+" ta moment pawa gese — ekta click kore preview dekho."; st.className="status ok";
+        },60);
+      });
+
+      /* ---------------- captions ---------------- */
+      var capOverlay=$("capOverlay");
+      function capWords(text){ return text.trim().split(/\s+/).filter(Boolean); }
+      function activeCap(t){
+        for(var i=0;i<S.captions.length;i++){ if(t>=S.captions[i].start && t<S.captions[i].end) return i; }
+        return -1;
+      }
+      function renderCapOverlay(){
+        var cs=S.capStyle;
+        capOverlay.className="capoverlay pos-"+cs.pos+(cs.bg?" bg":"")+(cs.anim==="pop"?" anim-pop":"")+(cs.anim==="fade"?" anim-fade":"");
+        capOverlay.style.fontFamily=cs.font;
+        var stageW=$("stage").clientWidth||320;
+        capOverlay.style.fontSize=Math.round(cs.size*(stageW/360)*10)/10+"px";
+        capOverlay.style.display = (cs.show && S.captions.length) ? "block":"none";
+      }
+      function updateCaptionOverlay(){
+        renderCapOverlay();
+        if(!S.capStyle.show){ capOverlay.innerHTML=""; return; }
+        var idx=activeCap(vid.currentTime);
+        if(idx<0){ capOverlay.innerHTML=""; return; }
+        var cap=S.captions[idx], words=capWords(cap.text);
+        if(!words.length){ capOverlay.innerHTML=""; return; }
+        var dur=Math.max(0.1,cap.end-cap.start);
+        var prog=clamp((vid.currentTime-cap.start)/dur,0,1);
+        var hot = S.capStyle.anim==="none" ? -1 : Math.min(words.length-1, Math.floor(prog*words.length));
+        capOverlay.innerHTML=words.map(function(w,i){
+          return '<span class="w'+(i===hot?" hot":"")+'" style="color:'+(i===hot && S.capStyle.anim==="karaoke" ? "#111" : S.capStyle.color)+'">'+w.replace(/</g,"&lt;")+"</span>";
+        }).join(" ");
+        if(S.capStyle.anim==="karaoke"){
+          capOverlay.querySelectorAll(".w").forEach(function(el,i){ if(i===hot){ el.style.background="#ffd21f"; } });
+        }
+      }
+      function sortCaps(){ S.captions.sort(function(a,b){ return a.start-b.start; }); }
+      function renderCapTrack(){
+        var track=$("capTrack"); track.querySelectorAll(".capblock").forEach(function(n){ n.remove(); });
+        if(S.duration<=0) return;
+        S.captions.forEach(function(c,i){
+          var d=document.createElement("div"); d.className="capblock"+(i===S.selCap?" sel":"");
+          d.style.left=(c.start/S.duration*100)+"%";
+          d.style.width=(Math.max(1.2,(c.end-c.start)/S.duration*100))+"%";
+          d.textContent=c.text;
+          d.addEventListener("click", function(ev){ ev.stopPropagation(); selectCap(i); showTab("page-caps"); vid.currentTime=c.start; });
+          track.appendChild(d);
+        });
+      }
+      function renderCapList(){
+        sortCaps();
+        var list=$("capList"); list.innerHTML="";
+        if(!S.captions.length){
+          list.innerHTML='<p class="tiny">Ekhono caption nai. Auto captions chalao, transcript paste koro, ba nije line add koro.</p>';
+        }
+        S.captions.forEach(function(c,i){
+          var box=document.createElement("div"); box.className="capitem"+(i===S.selCap?" sel":"");
+          var ta=document.createElement("textarea"); ta.value=c.text; ta.rows=2; ta.setAttribute("aria-label","Caption text "+(i+1));
+          ta.addEventListener("input", function(){ c.text=ta.value; renderCapTrack(); updateCaptionOverlay(); });
+          ta.addEventListener("focus", function(){ selectCap(i,true); });
+          var times=document.createElement("div"); times.className="times";
+          var si=document.createElement("input"); si.type="number"; si.step="0.1"; si.min="0"; si.value=c.start.toFixed(1); si.setAttribute("aria-label","Start seconds");
+          var ei=document.createElement("input"); ei.type="number"; ei.step="0.1"; ei.min="0"; ei.value=c.end.toFixed(1); ei.setAttribute("aria-label","End seconds");
+          si.addEventListener("change", function(){ c.start=clamp(parseFloat(si.value)||0,0,S.duration); renderCapTrack(); });
+          ei.addEventListener("change", function(){ c.end=clamp(parseFloat(ei.value)||0,c.start+0.3,S.duration||9999); renderCapTrack(); });
+          var seekB=document.createElement("button"); seekB.type="button"; seekB.className="btn small"; seekB.textContent="▶ Go";
+          seekB.addEventListener("click", function(){ vid.currentTime=c.start; vid.play(); });
+          var del=document.createElement("button"); del.type="button"; del.className="btn small danger"; del.textContent="Delete";
+          del.addEventListener("click", function(){ S.captions.splice(i,1); if(S.selCap===i)S.selCap=-1; renderCapList(); });
+          times.appendChild(si); times.appendChild(document.createTextNode("→")); times.appendChild(ei); times.appendChild(seekB); times.appendChild(del);
+          box.appendChild(ta); box.appendChild(times);
+          list.appendChild(box);
+        });
+        renderCapTrack(); updateCaptionOverlay();
+      }
+      function selectCap(i,quiet){ S.selCap=i; renderCapList(); }
+      $("addCapBtn").addEventListener("click", function(){
+        var t=S.url? vid.currentTime : 0;
+        S.captions.push({ start:t, end:Math.min(S.duration||t+3, t+3), text:"New caption — edit koro" });
+        S.selCap=S.captions.length-1; renderCapList();
+      });
+
+      /* caption style controls */
+      $("capFont").addEventListener("change", function(){ S.capStyle.font=this.value; updateCaptionOverlay(); });
+      $("capSize").addEventListener("input", function(){ S.capStyle.size=+this.value; $("capSizeVal").textContent=this.value; updateCaptionOverlay(); });
+      $("capPos").addEventListener("change", function(){ S.capStyle.pos=this.value; updateCaptionOverlay(); });
+      $("capAnim").addEventListener("change", function(){ S.capStyle.anim=this.value; updateCaptionOverlay(); });
+      $("capBg").addEventListener("change", function(){ S.capStyle.bg=this.checked; updateCaptionOverlay(); });
+      $("capShow").addEventListener("change", function(){ S.capStyle.show=this.checked; updateCaptionOverlay(); });
+      function setCapColor(col){
+        S.capStyle.color=col; $("capColorPick").value=col;
+        document.querySelectorAll("#capSwatches .sw").forEach(function(s){ s.setAttribute("aria-pressed", s.getAttribute("data-color")===col?"true":"false"); });
+        updateCaptionOverlay();
+      }
+      document.querySelectorAll("#capSwatches .sw").forEach(function(s){
+        s.addEventListener("click", function(){ setCapColor(s.getAttribute("data-color")); });
+      });
+      $("capColorPick").addEventListener("input", function(){ setCapColor(this.value); });
+
+      /* transcript -> captions */
+      $("transcriptBtn").addEventListener("click", function(){
+        var txt=$("transcriptBox").value.trim();
+        var st=$("capStatus");
+        if(!S.url){ st.textContent="Age video upload koro."; st.className="status err"; return; }
+        if(!txt){ st.textContent="Transcript box khali — age text paste koro."; st.className="status err"; return; }
+        var words=txt.split(/\s+/).filter(Boolean);
+        var a=S.inT, b=S.outT, total=Math.max(1,b-a), per=total/words.length, caps=[], cur=[], curStart=a;
+        words.forEach(function(w,i){
+          cur.push(w);
+          var t=a+(i+1)*per;
+          if(cur.length>=7 || i===words.length-1){
+            caps.push({ start:curStart, end:Math.min(b,t), text:cur.join(" ") });
+            cur=[]; curStart=t;
+          }
+        });
+        S.captions=caps; S.selCap=caps.length?0:-1; renderCapList();
+        st.textContent=caps.length+" ta caption line toiri hoise — ekhon style kore export koro."; st.className="status ok";
+      });
+
+      /* mic dictation for one line (Web Speech API, where available) */
+      $("micBtn").addEventListener("click", function(){
+        var st=$("capStatus");
+        var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+        if(!SR){ st.textContent="Ei browser-e mic dictation nai (Chrome-e chole). Auto captions ba transcript use koro."; st.className="status err"; return; }
+        var rec=new SR(); rec.lang="en-US"; rec.interimResults=false;
+        st.textContent="Shunchi… kotha bolo."; st.className="status";
+        rec.onresult=function(e){
+          var said=e.results[0][0].transcript;
+          var t=vid.currentTime||0;
+          S.captions.push({ start:t, end:Math.min(S.duration||t+3,t+3), text:said });
+          renderCapList(); st.textContent="Caption add hoise: “"+said+"”"; st.className="status ok";
+        };
+        rec.onerror=function(){ st.textContent="Mic theke shona jay ni — abar try koro."; st.className="status err"; };
+        try{ rec.start(); }catch(err){ st.textContent="Mic start hoy ni."; st.className="status err"; }
+      });
+
+      /* -------- auto captions: Whisper in the browser -------- */
+      function extractPCM16k(){
+        return fetch(S.url).then(function(r){ return r.arrayBuffer(); }).then(function(buf){
+          var AC=window.AudioContext||window.webkitAudioContext;
+          var ctx=new AC();
+          return ctx.decodeAudioData(buf).then(function(ab){
+            var off=new OfflineAudioContext(1, Math.ceil(ab.duration*16000), 16000);
+            var src=off.createBufferSource(); src.buffer=ab; src.connect(off.destination); src.start(0);
+            return off.startRendering().then(function(rb){ ctx.close(); return rb.getChannelData(0); });
+          });
+        });
+      }
+      function loadWhisper(){
+        if(S.whisperPipe) return Promise.resolve(S.whisperPipe);
+        return new Promise(function(res, rej){
+          function go(){
+            try{
+              var T=window.Transformers;
+              if(!T){ rej(new Error("AI library load hoy ni")); return; }
+              T.env.allowLocalModels=false;
+              T.pipeline("automatic-speech-recognition","Xenova/whisper-tiny.en").then(function(p){ S.whisperPipe=p; res(p); }).catch(rej);
+            }catch(e){ rej(e); }
+          }
+          if(window.Transformers){ go(); return; }
+          var sc=document.createElement("script");
+          sc.src="https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js";
+          sc.onload=go; sc.onerror=function(){ rej(new Error("AI library download hoy ni — net check koro")); };
+          document.head.appendChild(sc);
+        });
+      }
+      $("autoCapBtn").addEventListener("click", function(){
+        var st=$("capStatus"), btn=$("autoCapBtn");
+        if(!S.url){ st.textContent="Age video upload koro."; st.className="status err"; return; }
+        btn.disabled=true;
+        st.textContent="Audio ber kora hocche…"; st.className="status";
+        extractPCM16k().then(function(pcm){
+          st.textContent="Whisper AI model load hocche (prothombar ~40 MB download hobe)…";
+          return loadWhisper().then(function(pipe){
+            st.textContent="Kotha shune caption likhche… lomba video-te ektu somoy lagbe.";
+            return pipe(pcm, { chunk_length_s:30, stride_length_s:5, return_timestamps:true });
+          });
+        }).then(function(out){
+          var chunks=(out && out.chunks && out.chunks.length) ? out.chunks : null;
+          var caps=[];
+          if(chunks){
+            chunks.forEach(function(ch){
+              var txt=(ch.text||"").trim(); if(!txt) return;
+              var a=(ch.timestamp&&ch.timestamp[0])||0, b=(ch.timestamp&&ch.timestamp[1])||a+2.5;
+              var words=txt.split(/\s+/);
+              if(words.length<=8){ caps.push({start:a,end:b,text:txt}); }
+              else{
+                var per=(b-a)/words.length, cur=[], cs=a;
+                words.forEach(function(w,i){
+                  cur.push(w);
+                  if(cur.length>=8 || i===words.length-1){ caps.push({start:cs,end:Math.min(b,a+(i+1)*per),text:cur.join(" ")}); cur=[]; cs=a+(i+1)*per; }
+                });
+              }
+            });
+          }
+          if(!caps.length && out && out.text){
+            var words=out.text.trim().split(/\s+/), total=S.duration||words.length, per=total/words.length, cur=[], cs=0;
+            words.forEach(function(w,i){ cur.push(w); if(cur.length>=8||i===words.length-1){ caps.push({start:cs,end:Math.min(total,(i+1)*per),text:cur.join(" ")}); cur=[]; cs=(i+1)*per; } });
+          }
+          if(!caps.length) throw new Error("Kono kotha bujha jay ni — video-te clear voice thakle bhalo kaj kore.");
+          S.captions=caps; S.selCap=0; renderCapList();
+          st.textContent="Hoise! "+caps.length+" ta caption line toiri — bhul thakle niche edit kore nao, export-e emnitei burn hoye jabe."; st.className="status ok";
+        }).catch(function(err){
+          st.textContent="Auto caption hoy ni: "+(err && err.message ? err.message : "unknown error")+". Transcript paste koreo caption banano jabe."; st.className="status err";
+        }).then(function(){ btn.disabled=false; });
+      });
+
+      /* ---------------- audio extras ---------------- */
+      $("musicBtn").addEventListener("click", function(){ $("musicInput").click(); });
+      $("musicInput").addEventListener("change", function(){
+        var f=this.files[0]; if(!f) return;
+        S.musicName=f.name; $("musicName").textContent=f.name;
+        var AC=window.AudioContext||window.webkitAudioContext;
+        var ctx=new AC();
+        f.arrayBuffer().then(function(b){ return ctx.decodeAudioData(b); }).then(function(ab){
+          S.musicBuf=ab; ctx.close(); $("musicName").textContent=f.name+" · ready";
+        }).catch(function(){ $("musicName").textContent=f.name+" (decode hoy ni)"; });
+      });
+      $("musicVol").addEventListener("input", function(){ $("musicVolVal").textContent=this.value+"%"; });
+      $("sfxBtn").addEventListener("click", function(){
+        var AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+        var ctx=new AC(), t=ctx.currentTime;
+        var osc=ctx.createOscillator(), g=ctx.createGain();
+        osc.type="sawtooth"; osc.frequency.setValueAtTime(180,t); osc.frequency.exponentialRampToValueAtTime(1400,t+0.22);
+        g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.12,t+0.03); g.gain.exponentialRampToValueAtTime(0.0001,t+0.3);
+        osc.connect(g); g.connect(ctx.destination); osc.start(t); osc.stop(t+0.32);
+        osc.onended=function(){ ctx.close(); };
+      });
+      $("wmChk").addEventListener("change", function(){
+        $("wmTextField").style.display=this.checked?"block":"none";
+        $("wmOverlay").style.display=this.checked?"block":"none";
+      });
+      $("wmText").addEventListener("input", function(){ $("wmOverlay").textContent=this.value||"Fahim"; });
+
+      /* ---------------- export ---------------- */
+      function pickMime(){
+        var cands=["video/mp4;codecs=avc1.640028,mp4a.40.2","video/mp4","video/webm;codecs=vp9,opus","video/webm"];
+        for(var i=0;i<cands.length;i++){ if(window.MediaRecorder && MediaRecorder.isTypeSupported(cands[i])) return cands[i]; }
+        return "";
+      }
+      function drawFrame(ctx,W,H){
+        var vw=vid.videoWidth, vh=vid.videoHeight; if(!vw) return;
+        ctx.fillStyle="#000"; ctx.fillRect(0,0,W,H);
+        var zoom=S.zoom;
+        var targetAR=W/H, srcAR=vw/vh, sw, sh;
+        if(srcAR>targetAR){ sh=vh; sw=vh*targetAR; } else { sw=vw; sh=vw/targetAR; }
+        sw/=zoom; sh/=zoom;
+        var sx=(vw-sw)/2, sy=(vh-sh)/2;
+        if($("faceChk").checked) sy=(vh-sh)*0.22;
+        ctx.save();
+        try{ ctx.filter=FILTERS[S.filter]||"none"; }catch(e){}
+        /* transition: first 0.6s of the clip */
+        var tIn=vid.currentTime-S.inT, fade=1;
+        if(S.transition==="fade") fade=clamp(tIn/0.6,0,1);
+        ctx.globalAlpha=fade;
+        var dx=0, dy=0, dw=W, dh=H;
+        if(S.transition==="slide") dy=(1-clamp(tIn/0.6,0,1))*H*0.25;
+        if(S.transition==="zoom"){ var z=1+(1-clamp(tIn/0.6,0,1))*0.25; dw=W*z; dh=H*z; dx=(W-dw)/2; dy=(H-dh)/2; }
+        ctx.drawImage(vid, sx,sy,sw,sh, dx,dy,dw,dh);
+        ctx.restore();
+        /* captions burned in */
+        var cs=S.capStyle;
+        if(cs.show){
+          var idx=activeCap(vid.currentTime);
+          if(idx>=0){
+            var cap=S.captions[idx], words=capWords(cap.text);
+            if(words.length){
+              var dur=Math.max(0.1,cap.end-cap.start);
+              var prog=clamp((vid.currentTime-cap.start)/dur,0,1);
+              var hot=cs.anim==="none"?-1:Math.min(words.length-1,Math.floor(prog*words.length));
+              var fs=Math.round(cs.size*(W/360)*(S.fmt==="16:9"?0.8:1.15));
+              ctx.font="800 "+fs+"px "+cs.font;
+              ctx.textAlign="center"; ctx.textBaseline="middle";
+              var maxW=W*0.88, lines=[], line="";
+              words.forEach(function(w,i){
+                var test=line? line+" "+w : w;
+                if(ctx.measureText(test).width>maxW && line){ lines.push(line); line=w; } else line=test;
+              });
+              if(line) lines.push(line);
+              var lh=fs*1.3, totalH=lines.length*lh;
+              var cy = cs.pos==="top" ? H*0.08+totalH/2 : cs.pos==="center" ? H/2 : H*0.93-totalH/2;
+              lines.forEach(function(ln,li){
+                var y=cy-totalH/2+lh*(li+0.5);
+                var lineWords=ln.split(" ");
+                var startIdx=0; for(var q=0;q<li;q++) startIdx+=lines[q].split(" ").length;
+                var widths=lineWords.map(function(w){ return ctx.measureText(w).width; });
+                var spaceW=ctx.measureText(" ").width;
+                var lineW=widths.reduce(function(a,b){return a+b;},0)+spaceW*(lineWords.length-1);
+                var x=W/2-lineW/2;
+                lineWords.forEach(function(w,wi){
+                  var gi=startIdx+wi;
+                  var isHot = gi===hot;
+                  var ww=widths[wi];
+                  if(cs.bg){ ctx.fillStyle="rgba(0,0,0,0.55)"; roundRect(ctx,x-4,y-lh/2+3,ww+8,lh-6,6); ctx.fill(); }
+                  if(isHot && cs.anim==="karaoke"){ ctx.fillStyle="#ffd21f"; roundRect(ctx,x-4,y-lh/2+3,ww+8,lh-6,6); ctx.fill(); ctx.fillStyle="#111"; }
+                  else { ctx.fillStyle=cs.color; ctx.shadowColor="rgba(0,0,0,.7)"; ctx.shadowBlur=6; }
+                  ctx.textAlign="left";
+                  ctx.fillText(w,x,y);
+                  ctx.shadowBlur=0; ctx.textAlign="center";
+                  x+=ww+spaceW;
+                });
+              });
+            }
+          }
+        }
+        if($("wmChk").checked){
+          ctx.font="700 "+Math.round(W*0.035)+"px Archivo, sans-serif";
+          ctx.fillStyle="rgba(255,255,255,0.55)"; ctx.textAlign="right"; ctx.textBaseline="alphabetic";
+          ctx.fillText($("wmText").value||"Fahim", W-16, H-16);
+        }
+      }
+      function roundRect(ctx,x,y,w,h,r){
+        ctx.beginPath();
+        ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+        ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
+      }
+
+      /* WebM -> MP4 conversion in the browser (ffmpeg.wasm, loaded on demand) */
+      var ffmpegInst=null;
+      function loadScriptOnce(src){
+        return new Promise(function(res, rej){
+          var sc=document.createElement("script"); sc.src=src;
+          sc.onload=res; sc.onerror=function(){ rej(new Error("load fail")); };
+          document.head.appendChild(sc);
+        });
+      }
+      function transcodeToMp4(webmBlob){
+        function ready(){
+          if(ffmpegInst) return Promise.resolve(ffmpegInst);
+          var FF=window.FFmpeg;
+          if(!FF || !FF.createFFmpeg) return Promise.reject(new Error("ffmpeg nai"));
+          var inst=FF.createFFmpeg({ log:false, corePath:"https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js" });
+          return inst.load().then(function(){ ffmpegInst=inst; return inst; });
+        }
+        var start = window.FFmpeg ? Promise.resolve() : loadScriptOnce("https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.0/dist/ffmpeg.min.js");
+        return start.then(ready).then(function(inst){
+          return window.FFmpeg.fetchFile(webmBlob).then(function(data){
+            inst.FS("writeFile","in.webm",data);
+            return inst.run("-i","in.webm","-c:v","libx264","-pix_fmt","yuv420p","-c:a","aac","-movflags","+faststart","out.mp4").then(function(){
+              var out=inst.FS("readFile","out.mp4");
+              try{ inst.FS("unlink","in.webm"); inst.FS("unlink","out.mp4"); }catch(e){}
+              return new Blob([out.buffer],{type:"video/mp4"});
+            });
+          });
+        });
+      }
+
+      function exportRange(range, fileLabel){
+        return new Promise(function(resolve, reject){
+          if(!S.url){ reject(new Error("Age video upload koro")); return; }
+          var dims=outDims(), W=dims.w, H=dims.h, fps=parseInt($("fpsSel").value,10);
+          var canvas=document.createElement("canvas"); canvas.width=W; canvas.height=H;
+          var ctx=canvas.getContext("2d");
+          var AC=window.AudioContext||window.webkitAudioContext;
+          var actx=new AC();
+          var srcNode=actx.createMediaElementSource(vid);
+          var comp=null;
+          var chainIn=srcNode;
+          if($("denoiseChk").checked){ var hp=actx.createBiquadFilter(); hp.type="highpass"; hp.frequency.value=120; chainIn.connect(hp); chainIn=hp; }
+          if($("enhanceChk").checked){ comp=actx.createDynamicsCompressor(); comp.threshold.value=-18; comp.ratio.value=4; chainIn.connect(comp); chainIn=comp; }
+          var vGain=actx.createGain(); vGain.gain.value=parseInt($("volSlider2").value,10)/100;
+          var dest=actx.createMediaStreamDestination();
+          chainIn.connect(vGain); vGain.connect(actx.destination); vGain.connect(dest);
+          var extraNodes=[];
+          if(S.musicBuf){
+            var ms=actx.createBufferSource(); ms.buffer=S.musicBuf; ms.loop=true;
+            var mg=actx.createGain(); mg.gain.value=parseInt($("musicVol").value,10)/100;
+            ms.connect(mg); mg.connect(dest); mg.connect(actx.destination); extraNodes.push(ms);
+          }
+          if($("sfxChk").checked){
+            var osc=actx.createOscillator(), og=actx.createGain(), t0=actx.currentTime;
+            osc.type="sawtooth"; osc.frequency.setValueAtTime(180,t0); osc.frequency.exponentialRampToValueAtTime(1400,t0+0.22);
+            og.gain.setValueAtTime(0.0001,t0); og.gain.exponentialRampToValueAtTime(0.1,t0+0.03); og.gain.exponentialRampToValueAtTime(0.0001,t0+0.3);
+            osc.connect(og); og.connect(dest); extraNodes.push(osc);
+          }
+          var stream=canvas.captureStream(fps);
+          dest.stream.getAudioTracks().forEach(function(tr){ stream.addTrack(tr); });
+          var mime=pickMime();
+          var rec;
+          try{ rec=new MediaRecorder(stream, mime?{mimeType:mime, videoBitsPerSecond:12000000}:{videoBitsPerSecond:12000000}); }
+          catch(e){ actx.close(); reject(new Error("MediaRecorder ei browser-e cholche na")); return; }
+          var chunks=[];
+          rec.ondataavailable=function(e){ if(e.data.size) chunks.push(e.data); };
+          var raf=null, progTimer=null, done=false;
+          function cleanup(){
+            if(raf) cancelAnimationFrame(raf);
+            if(progTimer) clearInterval(progTimer);
+            extraNodes.forEach(function(n){ try{n.stop();}catch(e){} });
+            try{ srcNode.disconnect(); }catch(e){}
+            actx.close();
+            vid.playbackRate=1;
+          }
+          rec.onstop=function(){
+            if(done) return; done=true; cleanup();
+            var type=mime.indexOf("mp4")>=0 ? "video/mp4" : "video/webm";
+            var blob=new Blob(chunks,{type:type});
+            if(type==="video/mp4"){
+              resolve({ url:URL.createObjectURL(blob), ext:"mp4", size:blob.size, label:fileLabel });
+              return;
+            }
+            /* Browser direct MP4 record korte pare ni — in-page ffmpeg diye MP4-te convert */
+            $("exportStatus").textContent="MP4-te convert hocche… ektu somoy lagte pare.";
+            transcodeToMp4(blob).then(function(mp4){
+              resolve({ url:URL.createObjectURL(mp4), ext:"mp4", size:mp4.size, label:fileLabel });
+            }).catch(function(){
+              resolve({ url:URL.createObjectURL(blob), ext:"webm", size:blob.size, label:fileLabel, fallback:true });
+            });
+          };
+          /* fades + silence-skip driver */
+          var clipDur=(range.end-range.start)/S.speed;
+          var startedAt=performance.now();
+          function tick(){
+            drawFrame(ctx,W,H);
+            var el=(performance.now()-startedAt)/1000;
+            var fi=parseFloat($("fadeIn").value)||0, fo=parseFloat($("fadeOut").value)||0;
+            var g=parseInt($("volSlider2").value,10)/100;
+            if(fi>0 && el<fi) g*=el/fi;
+            if(fo>0 && el>clipDur-fo) g*=Math.max(0,(clipDur-el)/fo);
+            try{ vGain.gain.setTargetAtTime(Math.max(0,g), actx.currentTime, 0.05); }catch(e){}
+            if($("skipSilence").checked){ var sil=silenceAt(vid.currentTime); if(sil && sil.end<range.end) vid.currentTime=sil.end; }
+            if(S.cancelExport){ try{rec.stop();}catch(e){} reject(new Error("Export cancel kora hoise")); return; }
+            if(vid.currentTime>=range.end || vid.ended){ try{rec.stop();}catch(e){} return; }
+            raf=requestAnimationFrame(tick);
+          }
+          progTimer=setInterval(function(){
+            var el2=(performance.now()-startedAt)/1000;
+            $("exportProg").value=clamp(Math.round(el2/clipDur*100),0,99);
+            $("exportStatus").textContent="Rendering "+fileLabel+" — "+Math.round(el2)+"s / "+Math.round(clipDur)+"s ("+W+"×"+H+", "+fps+" FPS)";
+          },250);
+          vid.pause();
+          vid.currentTime=range.start;
+          vid.playbackRate=S.speed;
+          vid.onseeked=function(){
+            vid.onseeked=null;
+            rec.start(250);
+            extraNodes.forEach(function(n){ try{n.start();}catch(e){} });
+            vid.play().then(function(){ startedAt=performance.now(); tick(); }).catch(function(){ startedAt=performance.now(); tick(); });
+          };
+        });
+      }
+
+      var dlList=[];
+      function runExport(ranges){
+        if(S.exporting) return;
+        if(!S.url){ showTab("page-export"); $("exportBox").classList.add("show"); $("exportStatus").textContent="Age video upload koro — tarpor export hobe."; $("exportStatus").className="status err"; return; }
+        showTab("page-export");
+        S.exporting=true; S.cancelExport=false;
+        $("exportBox").classList.add("show");
+        $("dlLink").style.display="none";
+        $("exportProg").value=0;
+        var base=($("fileName").value||"fahim-clip").replace(/[^\w\- ]+/g,"").trim()||"fahim-clip";
+        var chain=Promise.resolve(), results=[];
+        ranges.forEach(function(r,i){
+          chain=chain.then(function(){
+            return exportRange(r, base+(ranges.length>1?"-"+(i+1):"")).then(function(res){ results.push(res); });
+          });
+        });
+        chain.then(function(){
+          S.exporting=false;
+          $("exportProg").value=100;
+          var last=results[results.length-1];
+          results.forEach(function(res,i){
+            var a=document.createElement("a");
+            a.href=res.url; a.download=res.label+"."+res.ext;
+            if(i===results.length-1){ var dl=$("dlLink"); dl.href=res.url; dl.download=res.label+"."+res.ext; dl.style.display="inline-flex"; dl.textContent="Download video ("+fmtSize(res.size)+", ."+res.ext+")"; }
+            else { document.body.appendChild(a); a.click(); setTimeout(function(){ a.remove(); },400); }
+          });
+          var anyFallback=results.some(function(r){ return r.fallback; });
+          $("exportStatus").textContent="Export shesh! "+results.length+" ta file ready — niche Download button-e click koro."+(anyFallback?" (Ekta file converter choleni bole WebM format-e ashche.)":"");
+          $("exportStatus").className="status ok";
+          vid.pause(); vid.currentTime=S.inT;
+        }).catch(function(err){
+          S.exporting=false;
+          $("exportStatus").textContent=err && err.message ? err.message : "Export fail hoise.";
+          $("exportStatus").className="status err";
+          vid.pause();
+        });
+      }
+      $("exportBtn").addEventListener("click", function(){ runExport([{start:S.inT,end:S.outT}]); });
+      $("exportTopBtn").addEventListener("click", function(){ runExport([{start:S.inT,end:S.outT}]); });
+      $("exportAllBtn").addEventListener("click", function(){
+        if(!S.aiClips.length){ showTab("page-export"); $("exportBox").classList.add("show"); $("exportStatus").textContent="Age left panel theke “Find best moments” chaliye AI clip banao."; $("exportStatus").className="status err"; return; }
+        runExport(S.aiClips.map(function(c){ return {start:c.start,end:c.end}; }));
+      });
+      $("cancelExportBtn").addEventListener("click", function(){ S.cancelExport=true; });
+
+      /* init */
+      setFormat("9:16"); setVolume(90); applyZoom(); renderCapOverlay();
+    })();
+    </script>
+  </body>
+</html>
