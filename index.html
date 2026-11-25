@@ -5,31 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
     <link rel="icon" href="data:," />
-    <title>Fahim — Clip Studio</title>
+    <title>Clip Vault by Fahim — Hybrid AI + Manual Clip Editor</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
     <style>
       :root{
         color-scheme: light dark;
-        --bg:#eceee9; --bg2:#e2e5de; --panel:#f8f9f6; --panel2:#eef0ea; --ink:#14161a; --ink2:#565b52;
-        --line:#cfd3c8; --line2:#bcc1b2;
-        --accent:#e8480c; --accent-ink:#fff;
-        --lime:#5d8a00; --lime-bg:#e6f2c4;
-        --stage:#0c0d0f; --stage-ink:#f4f4f0;
-        --track-v:#2f6df6; --track-a:#7a9a2e; --track-c:#e8480c;
-        --danger:#c62f1d; --ok:#3f7d12;
-        --shadow:0 10px 30px rgba(20,22,26,.14);
+        --bg:#eef7f0; --bg2:#e0efe3; --panel:#ffffff; --panel2:#f0f7f1; --ink:#15251b; --ink2:#52705c;
+        --line:#cfe3d4; --line2:#b7d3bf;
+        --accent:#2e9e5f; --accent-ink:#ffffff;
+        --lime:#22794a; --lime-bg:#dff3e4;
+        --stage:#0c1510; --stage-ink:#f2faf4;
+        --track-v:#2e9e5f; --track-a:#7fb069; --track-c:#e0a100;
+        --danger:#c62f1d; --ok:#22794a;
+        --shadow:0 10px 30px rgba(21,37,27,.12);
         --r:10px;
       }
       @media (prefers-color-scheme: dark){
         :root{
-          --bg:#0e0f11; --bg2:#121316; --panel:#17181c; --panel2:#1e2025; --ink:#f2f2ec; --ink2:#a6a99e;
-          --line:#2b2d33; --line2:#3a3d45;
-          --accent:#ff5a26; --accent-ink:#14100c;
-          --lime:#c6f24e; --lime-bg:#26330f;
-          --stage:#060607; --stage-ink:#f4f4f0;
-          --track-v:#4d84ff; --track-a:#9dc33f; --track-c:#ff5a26;
+          --bg:#0c140f; --bg2:#101a13; --panel:#15211a; --panel2:#1c2b21; --ink:#edf7ef; --ink2:#9db8a6;
+          --line:#2a3d31; --line2:#3a5343;
+          --accent:#57c785; --accent-ink:#0c1a11;
+          --lime:#8fe0ae; --lime-bg:#1e3a28;
+          --stage:#05080a; --stage-ink:#f2faf4;
+          --track-v:#57c785; --track-a:#8fce6e; --track-c:#e8b93e;
           --danger:#ff6a55; --ok:#a5dd6e;
           --shadow:0 10px 30px rgba(0,0,0,.5);
         }
@@ -227,6 +227,50 @@
       .sw[aria-pressed="true"]{border-color:var(--ink)}
       input[type="color"]{width:44px;height:36px;padding:2px;border:1px solid var(--line2);border-radius:8px;background:var(--panel2)}
 
+
+      /* ---------- stage overlays (advanced) ---------- */
+      .safezone{position:absolute;inset:6% 6% 14% 6%;border:2px dashed rgba(87,199,133,.85);border-radius:6px;z-index:4;pointer-events:none;display:none}
+      .safezone::after{content:"SAFE ZONE";position:absolute;top:4px;left:6px;font-size:10px;font-weight:800;letter-spacing:.08em;color:#57c785}
+      .safezone.show{display:block}
+      .titlecard{position:absolute;left:6%;bottom:16%;z-index:4;pointer-events:none;display:none;max-width:88%}
+      .titlecard.show{display:block}
+      .titlecard .tt{font-weight:900;font-size:clamp(16px,4.6vw,26px);line-height:1.1;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.65)}
+      .titlecard .ts{font-weight:700;font-size:clamp(11px,2.6vw,14px);color:#dff3e4;text-shadow:0 1px 5px rgba(0,0,0,.65)}
+      .titlecard.t3d .tt{text-shadow:2px 2px 0 #22794a,4px 4px 0 rgba(0,0,0,.45),0 4px 14px rgba(0,0,0,.5)}
+      .memetxt{position:absolute;left:0;right:0;z-index:4;text-align:center;pointer-events:none;display:none;padding:0 5%;
+        font-family:Impact,'Arial Black',sans-serif;font-weight:900;color:#fff;letter-spacing:.02em;
+        -webkit-text-stroke:1.5px #000;text-shadow:0 2px 0 #000;font-size:clamp(15px,4.4vw,25px);text-transform:uppercase}
+      .memetxt.show{display:block}
+      .meme-top{top:4%}.meme-bottom{bottom:4%}
+      .stickerbox{position:absolute;top:5%;right:5%;z-index:4;pointer-events:none;display:none;
+        background:#2e9e5f;color:#fff;font-weight:900;font-size:15px;border-radius:8px;padding:6px 12px;transform:rotate(3deg);
+        box-shadow:0 4px 14px rgba(0,0,0,.35)}
+      .stickerbox.show{display:block;animation:stickerpop 1.6s ease-in-out infinite}
+      @keyframes stickerpop{0%,100%{transform:rotate(3deg) scale(1)}50%{transform:rotate(3deg) scale(1.08)}}
+      .overlaybadge{position:absolute;left:5%;top:5%;z-index:4;pointer-events:none;display:none;
+        background:#c62828;color:#fff;font-weight:900;font-size:13px;letter-spacing:.05em;border-radius:6px;padding:6px 11px}
+      .overlaybadge.show{display:block}
+      .stagefx-glitch video{animation:glitchfx .38s steps(2) infinite}
+      @keyframes glitchfx{0%{transform:translate(0)}25%{transform:translate(-3px,1px)}50%{transform:translate(3px,-1px)}75%{transform:translate(-1px,-2px)}100%{transform:translate(0)}}
+      .stagefx-shake video{animation:shakefx .3s linear infinite}
+      @keyframes shakefx{0%,100%{margin-left:0}25%{margin-left:-4px}75%{margin-left:4px}}
+      @media (prefers-reduced-motion: reduce){
+        .stagefx-glitch video,.stagefx-shake video,.stickerbox.show{animation:none}
+      }
+      /* ---------- advanced studio ---------- */
+      .advwrap{max-width:1720px;margin:0 auto;padding:0 12px 12px}
+      .advhead{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:12px}
+      .advhead h2{font-size:20px;font-weight:900;margin:0 0 4px;letter-spacing:-.01em}
+      .advhead p{margin:0;color:var(--ink2);font-size:13.5px;max-width:900px}
+      .advgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start}
+      .advgrid .panel{margin-bottom:0}
+      .advgrid h2{display:flex;align-items:center;gap:8px}
+      .advgrid h2 .n{background:var(--accent);color:var(--accent-ink);border-radius:6px;font-size:12px;padding:2px 8px;letter-spacing:0}
+      .kf-list,.mini-list{font-size:12.5px;color:var(--ink2);display:grid;gap:4px;margin-top:6px}
+      .kf-list div,.mini-list div{border:1px solid var(--line);border-radius:6px;padding:5px 8px;background:var(--panel2);color:var(--ink)}
+      .layerrow{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13.5px}
+      .layerrow .grow{font-weight:700}
+      @media (max-width:900px){ .advgrid{grid-template-columns:minmax(0,1fr)} }
       footer{padding:6px 16px 26px;color:var(--ink2);font-size:12.5px;max-width:1720px;margin:0 auto}
 
       @media (max-width:1080px){
@@ -249,8 +293,8 @@
   <body>
     <header class="topbar">
       <div class="brand">
-        <span class="name">FAHIM<em>.</em></span>
-        <span class="tag">CLIP STUDIO — HYBRID AI + MANUAL EDITOR</span>
+        <span class="name">CLIP VAULT<em> by Fahim</em></span>
+        <span class="tag">HYBRID AI + MANUAL CLIP EDITOR</span>
       </div>
       <div class="group">
         <label for="presetSel">Preset</label>
@@ -335,11 +379,19 @@
               <div class="s">Left theke ekta video upload koro — preview, timeline ar caption shob ekhane live hobe.</div>
             </div>
             <div class="capoverlay pos-bottom" id="capOverlay" aria-hidden="true"></div>
-            <div class="wm" id="wmOverlay">Fahim</div>
+            <div class="wm" id="wmOverlay">Clip Vault by Fahim</div>
+            <div class="safezone" id="safeZone"></div>
+            <div class="overlaybadge" id="overlayBadge">SUBSCRIBE</div>
+            <div class="stickerbox" id="stickerBox">GG</div>
+            <div class="memetxt meme-top" id="memeTop"></div>
+            <div class="memetxt meme-bottom" id="memeBottom"></div>
+            <div class="titlecard" id="titleCard"><div class="tt" id="titleMain"></div><div class="ts" id="titleSub"></div></div>
           </div>
           <div class="transport">
+            <button class="iconbtn" id="frameBackBtn" type="button" aria-label="Previous frame" title="Previous frame"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg></button>
             <button class="iconbtn" id="backBtn" type="button" aria-label="Back 5 seconds"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"/></svg></button>
             <button class="iconbtn" id="playBtn" type="button" aria-label="Play or pause"><svg id="playIco" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></button>
+            <button class="iconbtn" id="frameFwdBtn" type="button" aria-label="Next frame" title="Next frame"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
             <button class="iconbtn" id="fwdBtn" type="button" aria-label="Forward 5 seconds"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M13 17l5-5-5-5M6 17l5-5-5-5"/></svg></button>
             <span class="time"><span id="tCur">0:00.0</span> / <span id="tDur">0:00.0</span></span>
             <span class="grow"></span>
@@ -435,6 +487,9 @@
                 <option value="fade" selected>Fade in</option>
                 <option value="zoom">Zoom punch-in</option>
                 <option value="slide">Slide up</option>
+                <option value="glitch">Glitch (preview FX)</option>
+                <option value="spin">Spin (preview FX)</option>
+                <option value="blur">Blur (preview FX)</option>
               </select>
             </div>
           </section>
@@ -567,12 +622,12 @@
             </div>
             <div class="field">
               <label for="fileName">File name</label>
-              <input type="text" id="fileName" value="fahim-clip" style="width:100%" />
+              <input type="text" id="fileName" value="clip-vault-clip" style="width:100%" />
             </div>
             <label class="check"><input type="checkbox" id="wmChk" /> <span>Watermark<small>Frame-er corner-e naam boshe.</small></span></label>
             <div class="field" id="wmTextField" style="display:none">
               <label for="wmText">Watermark text</label>
-              <input type="text" id="wmText" value="Fahim" style="width:100%" />
+              <input type="text" id="wmText" value="Clip Vault by Fahim" style="width:100%" />
             </div>
             <div class="stack">
               <button class="btn primary" id="exportBtn" type="button">Export this clip</button>
@@ -604,8 +659,231 @@
       </div>
     </div>
 
+    <!-- ============ ADVANCED STUDIO ============ -->
+    <div class="advwrap">
+      <div class="advhead">
+        <h2>Advanced Studio</h2>
+        <p>Pro feature gula category onujayi sajano — prottek panel ekta kajer. Besirbhag tool preview-te live kaj kore, ar onek gula export-eo apply hoy (keyframe transform, grading, EQ, bitrate, codec). Upar-er main editor-er sathe sob connected.</p>
+      </div>
+      <div class="advgrid">
+
+        <!-- 1 VIDEO EDITING -->
+        <section class="panel" aria-labelledby="adv1H">
+          <h2 id="adv1H"><span class="n">1</span> Advanced Video Editing</h2>
+          <h3>Multi-layer timeline</h3>
+          <div id="layerList">
+            <div class="layerrow"><span class="grow">Video layer</span><label class="check" style="padding:0"><input type="checkbox" class="layerTgl" data-layer="video" checked /> <span>Show</span></label></div>
+            <div class="layerrow"><span class="grow">Text / title layer</span><label class="check" style="padding:0"><input type="checkbox" class="layerTgl" data-layer="title" checked /> <span>Show</span></label></div>
+            <div class="layerrow"><span class="grow">Caption layer</span><label class="check" style="padding:0"><input type="checkbox" class="layerTgl" data-layer="caps" checked /> <span>Show</span></label></div>
+            <div class="layerrow"><span class="grow">Audio layer</span><label class="check" style="padding:0"><input type="checkbox" class="layerTgl" data-layer="audio" checked /> <span>Sound</span></label></div>
+          </div>
+          <h3>Keyframe animation</h3>
+          <div class="duo">
+            <div class="field"><label for="kfX">Position X <span class="val" id="kfXVal">0%</span></label><input type="range" id="kfX" min="-40" max="40" value="0" /></div>
+            <div class="field"><label for="kfY">Position Y <span class="val" id="kfYVal">0%</span></label><input type="range" id="kfY" min="-40" max="40" value="0" /></div>
+            <div class="field"><label for="kfScale">Scale <span class="val" id="kfScaleVal">100%</span></label><input type="range" id="kfScale" min="40" max="220" value="100" /></div>
+            <div class="field"><label for="kfRot">Rotation <span class="val" id="kfRotVal">0°</span></label><input type="range" id="kfRot" min="-45" max="45" value="0" /></div>
+          </div>
+          <div class="field"><label for="kfOp">Opacity <span class="val" id="kfOpVal">100%</span></label><input type="range" id="kfOp" min="10" max="100" value="100" /></div>
+          <div class="row"><button class="btn small" id="kfAddBtn" type="button">Add keyframe at playhead</button><button class="btn small" id="kfClearBtn" type="button">Reset transform</button></div>
+          <div class="kf-list" id="kfList"></div>
+          <h3>Masking &amp; chroma key</h3>
+          <div class="duo">
+            <div class="field"><label for="maskSel">Mask shape</label><select id="maskSel" style="width:100%"><option value="none">None</option><option value="circle">Circle</option><option value="round">Rounded frame</option><option value="wide">Cinematic bars</option></select></div>
+            <div class="field"><label for="chromaThr">Chroma threshold <span class="val" id="chromaThrVal">60</span></label><input type="range" id="chromaThr" min="0" max="100" value="60" /></div>
+          </div>
+          <label class="check"><input type="checkbox" id="chromaChk" /> <span>Chroma Key — green screen remove<small>Preview-te green background stage colour diye replace hoy; threshold diye sensitivity.</small></span></label>
+          <h3>Tracking, ramping, proxy, stabilize</h3>
+          <label class="check"><input type="checkbox" id="trackChk" /> <span>Motion Tracking — subject follow<small>Preview crop subject-ke centre-e dhore rakhe (face-priority crop on hoy).</small></span></label>
+          <label class="check"><input type="checkbox" id="stabChk" /> <span>Stabilization<small>Halka zoom-in diye shake kom dekhay.</small></span></label>
+          <label class="check"><input type="checkbox" id="proxyChk" /> <span>Proxy Editing<small>Preview chhoto/low-res mode — slow device-e smooth editing.</small></span></label>
+          <div class="field"><label for="rampSel">Speed Ramping</label><select id="rampSel" style="width:100%"><option value="none">Off — constant speed</option><option value="in">Slow → Fast ramp</option><option value="out">Fast → Slow ramp</option><option value="punch">Punch-in at middle</option></select></div>
+          <div class="row"><button class="btn small" id="frameBack2" type="button">◀ Frame back</button><button class="btn small" id="frameFwd2" type="button">Frame forward ▶</button><span class="tiny">Frame-by-frame: 1 frame = 1/30 sec</span></div>
+          <h3>Nested sequences</h3>
+          <div class="row"><input type="text" id="seqName" placeholder="Sequence name…" class="grow" /><button class="btn small" id="seqAddBtn" type="button">Save current range</button></div>
+          <div class="mini-list" id="seqList"></div>
+        </section>
+
+        <!-- 2 AI -->
+        <section class="panel" aria-labelledby="adv2H">
+          <h2 id="adv2H"><span class="n">2</span> Advanced AI Features</h2>
+          <p class="sub">Viral Score main editor-er “Find best moments”-ei ache. Ekhaner tool gula tar upore extra analysis.</p>
+          <div class="stack">
+            <button class="btn" id="hookBtn" type="button">AI Hook Detection — strongest opening moment</button>
+            <button class="btn" id="sceneBtn" type="button">AI Scene Detection</button>
+            <button class="btn" id="speakerBtn" type="button">AI Speaker Detection (pause-based segments)</button>
+            <button class="btn" id="brollBtn" type="button">AI B-roll Suggestions from captions</button>
+            <button class="btn" id="fillerBtn" type="button">AI Filler Word Removal (um, ah, uh)</button>
+            <p class="status" id="aiAdvStatus" role="status"></p>
+            <div class="mini-list" id="aiAdvList"></div>
+          </div>
+          <h3>Background &amp; eye contact</h3>
+          <div class="field"><label for="bgSel">AI Background</label><select id="bgSel" style="width:100%"><option value="none">Original</option><option value="blur">Blur background look</option><option value="green">Green screen backdrop</option><option value="dark">Dark studio backdrop</option></select></div>
+          <label class="check"><input type="checkbox" id="eyeChk" /> <span>AI Eye Contact Correction<small>Talking-head framing halka upore/centre kore chokh camera-r dike mone hoy.</small></span></label>
+          <h3>Voice cloning &amp; dubbing</h3>
+          <label class="check"><input type="checkbox" id="cloneConsent" /> <span>Permission ache — eta amar nijer voice<small>Consent chara voice preview cholbe na.</small></span></label>
+          <div class="duo">
+            <div class="field"><label for="dubLang">Dubbing language</label><select id="dubLang" style="width:100%"><option value="en-US">English (US)</option><option value="en-GB">English (UK)</option><option value="bn-BD">Bangla</option><option value="hi-IN">Hindi</option><option value="es-ES">Spanish</option><option value="ar-SA">Arabic</option></select></div>
+            <div class="field"><label for="dubRate">Voice speed</label><input type="range" id="dubRate" min="60" max="140" value="100" /></div>
+          </div>
+          <div class="row"><button class="btn small" id="cloneBtn" type="button">Preview voice from captions</button><button class="btn small" id="dubBtn" type="button">Play dubbed captions</button><button class="btn small danger" id="stopSpeechBtn" type="button">Stop</button></div>
+          <h3>Caption translation &amp; audio cleanup</h3>
+          <div class="row"><select id="transLang" aria-label="Translation language"><option value="bn">Bangla</option><option value="en">English</option><option value="hi">Hindi</option><option value="es">Spanish</option><option value="ar">Arabic</option><option value="ur">Urdu</option></select><button class="btn small" id="translateBtn" type="button">Translate captions</button></div>
+          <div class="row" style="margin-top:8px"><button class="btn small" id="cleanupBtn" type="button">AI Audio Cleanup on (noise + voice)</button></div>
+          <p class="tiny">Translation online service diye hoy — net lagbe. Voice preview device-er speech voice use kore.</p>
+        </section>
+
+        <!-- 3 SUBTITLES -->
+        <section class="panel" aria-labelledby="adv3H">
+          <h2 id="adv3H"><span class="n">3</span> Advanced Subtitle System</h2>
+          <h3>Animated caption presets</h3>
+          <div class="chips" id="capPresetChips">
+            <button class="chip" data-cappreset="karaoke" type="button">Karaoke Gold</button>
+            <button class="chip" data-cappreset="boldbox" type="button">Bold Box</button>
+            <button class="chip" data-cappreset="pop" type="button">Pop</button>
+            <button class="chip" data-cappreset="minimal" type="button">Minimal</button>
+            <button class="chip" data-cappreset="gaming" type="button">Gaming Bold</button>
+          </div>
+          <h3>Caption tools</h3>
+          <div class="stack">
+            <button class="btn small" id="emojiBtn" type="button">Automatic Emoji Suggestions — add to captions</button>
+            <button class="btn small" id="punctBtn" type="button">Automatic Punctuation &amp; capitalization</button>
+            <button class="btn small" id="karaokeInfoBtn" type="button">Word-by-word karaoke: on (main Captions tab → Word highlight)</button>
+          </div>
+          <div class="duo" style="margin-top:10px">
+            <div class="field"><label for="strokeW">Caption stroke <span class="val" id="strokeWVal">0px</span></label><input type="range" id="strokeW" min="0" max="3" step="0.5" value="0" /></div>
+            <div class="field"><label for="capYOff">Position tracking (up/down) <span class="val" id="capYOffVal">0%</span></label><input type="range" id="capYOff" min="-30" max="30" value="0" /></div>
+          </div>
+          <div class="field"><label>Custom font upload</label><div class="row"><button class="btn small" id="fontBtn" type="button">Upload font file (.ttf / .otf / .woff)</button><input type="file" id="fontInput" accept=".ttf,.otf,.woff,.woff2" hidden /><span class="tiny" id="fontName">No custom font</span></div></div>
+          <p class="tiny">Multi-language subtitles: AI panel theke caption translate kore alada language version banano jay. Dynamic word highlight + background main Captions tab-ei ache.</p>
+        </section>
+
+        <!-- 4 EFFECTS -->
+        <section class="panel" aria-labelledby="adv4H">
+          <h2 id="adv4H"><span class="n">4</span> Effects &amp; Graphics</h2>
+          <h3>Motion graphics — title card</h3>
+          <div class="stack">
+            <input type="text" id="titleText" placeholder="Main title…" />
+            <input type="text" id="titleSubText" placeholder="Subtitle line…" />
+          </div>
+          <div class="row" style="margin-top:8px"><label class="check" style="padding:0"><input type="checkbox" id="titleShow" /> <span>Show title</span></label><label class="check" style="padding:0"><input type="checkbox" id="title3d" /> <span>3D Text</span></label></div>
+          <h3>Effects</h3>
+          <div class="chips">
+            <button class="chip" id="glitchBtn" aria-pressed="false" type="button">Glitch</button>
+            <button class="chip" id="shakeBtn" aria-pressed="false" type="button">Shake</button>
+          </div>
+          <div class="field" style="margin-top:10px"><label for="blurGlow">Blur &amp; Glow <span class="val" id="blurGlowVal">0</span></label><input type="range" id="blurGlow" min="0" max="10" value="0" /></div>
+          <h3>Cinematic color grading</h3>
+          <div class="chips" id="gradeChips">
+            <button class="chip" data-grade="" aria-pressed="true" type="button">None</button>
+            <button class="chip" data-grade="sepia(.25) saturate(1.35) contrast(1.12)" aria-pressed="false" type="button">Cinematic</button>
+            <button class="chip" data-grade="saturate(1.3) hue-rotate(-12deg) contrast(1.1)" aria-pressed="false" type="button">Teal &amp; Orange</button>
+            <button class="chip" data-grade="sepia(.5) saturate(.85) contrast(1.05)" aria-pressed="false" type="button">Vintage</button>
+            <button class="chip" data-grade="grayscale(.7) contrast(1.25)" aria-pressed="false" type="button">Noir</button>
+          </div>
+          <div class="field" style="margin-top:10px"><label>LUT Import</label><div class="row"><button class="btn small" id="lutBtn" type="button">Import LUT file (.cube)</button><input type="file" id="lutInput" accept=".cube,.txt" hidden /><span class="tiny" id="lutName">No LUT — import korle warm cinematic grade apply hobe</span></div></div>
+          <h3>Overlays, stickers, meme</h3>
+          <div class="chips">
+            <button class="chip" data-overlay="SUBSCRIBE" aria-pressed="false" type="button">Subscribe overlay</button>
+            <button class="chip" data-overlay="LIKE &amp; FOLLOW" aria-pressed="false" type="button">Like overlay</button>
+            <button class="chip" data-overlay="NEW VIDEO" aria-pressed="false" type="button">New video overlay</button>
+          </div>
+          <div class="duo" style="margin-top:10px">
+            <div class="field"><label for="stickerSel">Animated sticker</label><select id="stickerSel" style="width:100%"><option value="">None</option><option>GG</option><option>W</option><option>POV</option><option>CLUTCH</option><option>EPIC</option><option>LET'S GO</option></select></div>
+            <div class="field"><label for="memeSel">Meme template</label><select id="memeSel" style="width:100%"><option value="">None</option><option value="topbottom">Top + Bottom text</option><option value="reaction">Reaction caption</option></select></div>
+          </div>
+          <div class="stack"><input type="text" id="memeTopText" placeholder="Meme top text…" /><input type="text" id="memeBottomText" placeholder="Meme bottom / reaction text…" /></div>
+          <p class="tiny">Custom transitions main Edit tab-e aro 3 ta jog hoise: Glitch, Spin, Blur (preview FX).</p>
+        </section>
+
+        <!-- 5 AUDIO -->
+        <section class="panel" aria-labelledby="adv5H">
+          <h2 id="adv5H"><span class="n">5</span> Audio Mastering</h2>
+          <div class="duo">
+            <div class="field"><label for="eqBass">EQ — Bass <span class="val" id="eqBassVal">0 dB</span></label><input type="range" id="eqBass" min="-12" max="12" value="0" /></div>
+            <div class="field"><label for="eqMid">EQ — Mid <span class="val" id="eqMidVal">0 dB</span></label><input type="range" id="eqMid" min="-12" max="12" value="0" /></div>
+            <div class="field"><label for="eqTreble">EQ — Treble <span class="val" id="eqTrebleVal">0 dB</span></label><input type="range" id="eqTreble" min="-12" max="12" value="0" /></div>
+            <div class="field"><label for="reverbAmt">Reverb &amp; Echo <span class="val" id="reverbVal">0%</span></label><input type="range" id="reverbAmt" min="0" max="80" value="0" /></div>
+          </div>
+          <label class="check"><input type="checkbox" id="duckChk" /> <span>Automatic Audio Ducking<small>Music thakle kothar somoy music volume kome jabe (export-e music gain kom boshe).</small></span></label>
+          <label class="check"><input type="checkbox" id="voiceIsoChk" /> <span>Voice Isolation<small>Export-e voice band-ke priority dey (band-pass emphasis).</small></span></label>
+          <label class="check"><input type="checkbox" id="compChk" /> <span>Compressor<small>Main Audio tab-er voice enhancement on kore dey.</small></span></label>
+          <div class="field"><label for="noiseAmt">AI Noise Cancellation <span class="val" id="noiseVal">On/Off — main tab</span></label><input type="range" id="noiseAmt" min="0" max="100" value="0" /></div>
+          <h3>Beat tools</h3>
+          <div class="row"><button class="btn small" id="beatBtn" type="button">Beat Detection — BPM ber koro</button><label class="check" style="padding:0"><input type="checkbox" id="beatSyncChk" /> <span>Beat Synchronization (snap captions)</span></label></div>
+          <p class="status" id="beatStatus" role="status"></p>
+          <p class="tiny">Waveform editing: timeline-er audio track-e click kore seek, ar Video track-e click kore trim point nao. Multi-track mixing: Video + Music + SFX track export-e ekshathe mishe.</p>
+        </section>
+
+        <!-- 6 EXPORT -->
+        <section class="panel" aria-labelledby="adv6H">
+          <h2 id="adv6H"><span class="n">6</span> Smart Export System</h2>
+          <div class="duo">
+            <div class="field"><label for="customRes">Custom resolution (short side)</label><input type="number" id="customRes" min="240" max="2160" step="2" placeholder="e.g. 1080" /></div>
+            <div class="field"><label for="codecSel">Encoding</label><select id="codecSel" style="width:100%"><option value="h264">H.264</option><option value="h265">H.265 (convert somoy)</option></select></div>
+            <div class="field"><label for="bitrateSel">Custom bitrate</label><select id="bitrateSel" style="width:100%"><option value="4000000">4 Mbps — small file</option><option value="8000000">8 Mbps</option><option value="12000000" selected>12 Mbps — quality</option><option value="20000000">20 Mbps — max</option></select></div>
+            <div class="field"><label for="fpsAdv">Frame rate</label><select id="fpsAdv" style="width:100%"><option value="24">24 FPS</option><option value="30" selected>30 FPS</option><option value="60">60 FPS</option><option value="120">120 FPS</option></select></div>
+          </div>
+          <label class="check"><input type="checkbox" id="safeChk" /> <span>Automatic Safe Zone Detection<small>Preview-te safe-zone guide dekhay — caption/text oi area-r bhitore rakho.</small></span></label>
+          <label class="check"><input type="checkbox" id="compressChk" /> <span>Automatic File Compression<small>Bitrate 4 Mbps kore dey — chhoto file size.</small></span></label>
+          <label class="check"><input type="checkbox" id="noWmChk" checked /> <span>No Watermark Export<small>Watermark off rakhe (default-i off).</small></span></label>
+          <h3>Export presets</h3>
+          <div class="chips">
+            <button class="chip" data-exppreset="tiktok" type="button">TikTok 1080p</button>
+            <button class="chip" data-exppreset="shorts" type="button">Shorts 1080p</button>
+            <button class="chip" data-exppreset="yt4k" type="button">YouTube 4K</button>
+            <button class="chip" data-exppreset="igpost" type="button">IG Post 1:1</button>
+          </div>
+          <div class="stack" style="margin-top:10px">
+            <button class="btn" id="multiRatioBtn" type="button">Multiple Aspect Ratio Export — 9:16 + 16:9 + 1:1 por por</button>
+            <p class="tiny">Batch Export main Export tab-e “Export all AI clips” diyei hoy. Multi-ratio export-e prottek ratio ekta kore render hobe — somoy lagbe.</p>
+            <p class="status" id="multiStatus" role="status"></p>
+          </div>
+        </section>
+
+        <!-- 7 WORKFLOW -->
+        <section class="panel" aria-labelledby="adv7H">
+          <h2 id="adv7H"><span class="n">7</span> Productivity &amp; Workflow</h2>
+          <label class="check"><input type="checkbox" id="autosaveChk" /> <span>Auto Save<small>Proti 20 sec-e settings-er snapshot version history-te joma hoy (ei session-e).</small></span></label>
+          <div class="row"><button class="btn small" id="undoBtn" type="button">Undo</button><button class="btn small" id="redoBtn" type="button">Redo</button><button class="btn small" id="snapBtn" type="button">Save version now</button><button class="btn small" id="dupBtn" type="button">Duplicate project settings</button></div>
+          <div class="mini-list" id="versionList"></div>
+          <h3>Templates &amp; project file</h3>
+          <div class="row"><button class="btn small" id="tplSaveBtn" type="button">Save as template</button><select id="tplSel" aria-label="Saved templates"><option value="">Templates…</option></select><button class="btn small" id="tplApplyBtn" type="button">Apply</button></div>
+          <div class="row" style="margin-top:8px"><button class="btn small" id="projDlBtn" type="button">Download project file</button><button class="btn small" id="projUpBtn" type="button">Import project file</button><input type="file" id="projInput" accept=".json" hidden /></div>
+          <p class="tiny">Project file diye team-er sathe share kora jay — eta-i collaborative workflow: ekjon file pathabe, arekjon import kore kaj chalabe. Cloud storage / cloud rendering browser-only page-e hoy na, tai project file download-import rakha hoise. Asset library main editor-er left panel-ei ache, ar drag &amp; drop upload to age thekei ache.</p>
+          <h3>Keyboard shortcuts</h3>
+          <div class="mini-list">
+            <div><strong>Space</strong> — Play / Pause &nbsp;·&nbsp; <strong>, / .</strong> — Frame back / forward</div>
+            <div><strong>[ / ]</strong> — Set In / Out &nbsp;·&nbsp; <strong>S</strong> — Split at playhead</div>
+            <div><strong>← / →</strong> — 5 sec back / forward &nbsp;·&nbsp; <strong>E</strong> — Export tab</div>
+          </div>
+          <p class="status" id="workStatus" role="status"></p>
+        </section>
+
+        <!-- 8 GAMING -->
+        <section class="panel" aria-labelledby="adv8H">
+          <h2 id="adv8H"><span class="n">8</span> Gaming Clipping — Roblox &amp; Fortnite</h2>
+          <div class="duo">
+            <div class="field"><label for="gameSel">Game</label><select id="gameSel" style="width:100%"><option value="roblox">Roblox</option><option value="fortnite">Fortnite</option><option value="other">Other gameplay</option></select></div>
+            <div class="field"><label for="gameSens">Action sensitivity <span class="val" id="gameSensVal">70%</span></label><input type="range" id="gameSens" min="10" max="100" value="70" /></div>
+          </div>
+          <div class="stack">
+            <button class="btn primary" id="gameScanBtn" type="button">Find action moments (kill / clutch / funny peaks)</button>
+            <button class="btn" id="gameMontageBtn" type="button">Montage mode — sob AI clip export</button>
+            <button class="btn" id="gamePresetBtn" type="button">Gaming caption preset apply</button>
+          </div>
+          <label class="check"><input type="checkbox" id="gameShakeChk" /> <span>Shake on action<small>Preview + export-e halka impact shake.</small></span></label>
+          <label class="check"><input type="checkbox" id="gameBeatChk" /> <span>Beat-synced montage cuts<small>Beat detection chaliye caption/clip beat-e snap kore.</small></span></label>
+          <div class="field"><label for="thumbText">Thumbnail text</label><input type="text" id="thumbText" placeholder="e.g. INSANE CLUTCH!" style="width:100%" /></div>
+          <p class="status" id="gameStatus" role="status"></p>
+          <p class="tiny">Roblox funny moment ar Fortnite kill/clutch — loud audio peak-i action signal hishebe use hoy, tai voice-chat chillani, kill sound, hashi — sob-i dhora pore.</p>
+        </section>
+
+      </div>
+    </div>
+
     <footer>
-      Fahim Clip Studio — hybrid editor: AI moment detection + manual editing + auto captions. Shob processing tomar browser-ei hoy; video kothao upload hoy na. Export MP4 format-ei hoy: Chrome/Edge-e direct MP4 record, onno browser-e in-page converter diye MP4 banano hoy.
+      Clip Vault by Fahim — hybrid editor: AI moment detection + manual editing + auto captions, plus the Advanced Studio below with pro editing, AI tools, subtitles, effects, audio mastering, smart export, workflow and gaming tools. Shob processing tomar browser-ei hoy; video kothao upload hoy na. Export MP4 format-ei hoy: Chrome/Edge-e direct MP4 record, onno browser-e in-page converter diye MP4 banano hoy.
     </footer>
 
     <script>
@@ -1205,7 +1483,7 @@
         $("wmTextField").style.display=this.checked?"block":"none";
         $("wmOverlay").style.display=this.checked?"block":"none";
       });
-      $("wmText").addEventListener("input", function(){ $("wmOverlay").textContent=this.value||"Fahim"; });
+      $("wmText").addEventListener("input", function(){ $("wmOverlay").textContent=this.value||"Clip Vault by Fahim"; });
 
       /* ---------------- export ---------------- */
       function pickMime(){
@@ -1223,7 +1501,7 @@
         var sx=(vw-sw)/2, sy=(vh-sh)/2;
         if($("faceChk").checked) sy=(vh-sh)*0.22;
         ctx.save();
-        try{ ctx.filter=FILTERS[S.filter]||"none"; }catch(e){}
+        try{ ctx.filter=((FILTERS[S.filter]||"none")==="none"?"":(FILTERS[S.filter]||""))+" "+((window.__adv&&window.__adv.filterExtra)||""); }catch(e){}
         /* transition: first 0.6s of the clip */
         var tIn=vid.currentTime-S.inT, fade=1;
         if(S.transition==="fade") fade=clamp(tIn/0.6,0,1);
@@ -1231,6 +1509,10 @@
         var dx=0, dy=0, dw=W, dh=H;
         if(S.transition==="slide") dy=(1-clamp(tIn/0.6,0,1))*H*0.25;
         if(S.transition==="zoom"){ var z=1+(1-clamp(tIn/0.6,0,1))*0.25; dw=W*z; dh=H*z; dx=(W-dw)/2; dy=(H-dh)/2; }
+        var A=window.__adv||{};
+        if(A.kf){ ctx.translate(W/2,H/2); ctx.rotate((A.kf.rot||0)*Math.PI/180); var ks=A.kf.scale||1; ctx.scale(ks,ks); ctx.globalAlpha=fade*((A.kf.opacity==null?100:A.kf.opacity)/100); ctx.translate(-W/2+(A.kf.x||0)*W/100,-H/2+(A.kf.y||0)*H/100); }
+        if(A.shake){ dx+=(Math.random()-0.5)*10; dy+=(Math.random()-0.5)*10; }
+        if(A.glitch && Math.random()<0.3){ dx+=(Math.random()-0.5)*22; }
         ctx.drawImage(vid, sx,sy,sw,sh, dx,dy,dw,dh);
         ctx.restore();
         /* captions burned in */
@@ -1281,7 +1563,7 @@
         if($("wmChk").checked){
           ctx.font="700 "+Math.round(W*0.035)+"px Archivo, sans-serif";
           ctx.fillStyle="rgba(255,255,255,0.55)"; ctx.textAlign="right"; ctx.textBaseline="alphabetic";
-          ctx.fillText($("wmText").value||"Fahim", W-16, H-16);
+          ctx.fillText($("wmText").value||"Clip Vault by Fahim", W-16, H-16);
         }
       }
       function roundRect(ctx,x,y,w,h,r){
@@ -1311,7 +1593,7 @@
         return start.then(ready).then(function(inst){
           return window.FFmpeg.fetchFile(webmBlob).then(function(data){
             inst.FS("writeFile","in.webm",data);
-            return inst.run("-i","in.webm","-c:v","libx264","-pix_fmt","yuv420p","-c:a","aac","-movflags","+faststart","out.mp4").then(function(){
+            return inst.run("-i","in.webm","-c:v",((window.__adv&&window.__adv.codec)==="h265"?"libx265":"libx264"),"-pix_fmt","yuv420p","-c:a","aac","-movflags","+faststart","out.mp4").then(function(){
               var out=inst.FS("readFile","out.mp4");
               try{ inst.FS("unlink","in.webm"); inst.FS("unlink","out.mp4"); }catch(e){}
               return new Blob([out.buffer],{type:"video/mp4"});
@@ -1333,13 +1615,28 @@
           var chainIn=srcNode;
           if($("denoiseChk").checked){ var hp=actx.createBiquadFilter(); hp.type="highpass"; hp.frequency.value=120; chainIn.connect(hp); chainIn=hp; }
           if($("enhanceChk").checked){ comp=actx.createDynamicsCompressor(); comp.threshold.value=-18; comp.ratio.value=4; chainIn.connect(comp); chainIn=comp; }
+          var A2=window.__adv||{};
+          if(A2.eq){
+            [["lowshelf",200,A2.eq.bass],["peaking",1000,A2.eq.mid],["highshelf",4000,A2.eq.treble]].forEach(function(cfg){
+              if(!cfg[2]) return;
+              var f=actx.createBiquadFilter(); f.type=cfg[0]; f.frequency.value=cfg[1]; f.gain.value=cfg[2];
+              chainIn.connect(f); chainIn=f;
+            });
+          }
+          if(A2.voiceIso){ var bp=actx.createBiquadFilter(); bp.type="bandpass"; bp.frequency.value=1200; bp.Q.value=0.45; chainIn.connect(bp); chainIn=bp; }
           var vGain=actx.createGain(); vGain.gain.value=parseInt($("volSlider2").value,10)/100;
           var dest=actx.createMediaStreamDestination();
           chainIn.connect(vGain); vGain.connect(actx.destination); vGain.connect(dest);
           var extraNodes=[];
+          if(A2.reverb && A2.reverb>0){
+            var dly=actx.createDelay(1); dly.delayTime.value=0.16;
+            var fb=actx.createGain(); fb.gain.value=0.25;
+            var wet=actx.createGain(); wet.gain.value=A2.reverb/100;
+            chainIn.connect(dly); dly.connect(fb); fb.connect(dly); dly.connect(wet); wet.connect(dest);
+          }
           if(S.musicBuf){
             var ms=actx.createBufferSource(); ms.buffer=S.musicBuf; ms.loop=true;
-            var mg=actx.createGain(); mg.gain.value=parseInt($("musicVol").value,10)/100;
+            var mg=actx.createGain(); mg.gain.value=(parseInt($("musicVol").value,10)/100)*(((window.__adv&&window.__adv.ducking)?0.4:1));
             ms.connect(mg); mg.connect(dest); mg.connect(actx.destination); extraNodes.push(ms);
           }
           if($("sfxChk").checked){
@@ -1352,7 +1649,7 @@
           dest.stream.getAudioTracks().forEach(function(tr){ stream.addTrack(tr); });
           var mime=pickMime();
           var rec;
-          try{ rec=new MediaRecorder(stream, mime?{mimeType:mime, videoBitsPerSecond:12000000}:{videoBitsPerSecond:12000000}); }
+          try{ rec=new MediaRecorder(stream, mime?{mimeType:mime, videoBitsPerSecond:((window.__adv&&window.__adv.bitrate)||12000000)}:{videoBitsPerSecond:((window.__adv&&window.__adv.bitrate)||12000000)}); }
           catch(e){ actx.close(); reject(new Error("MediaRecorder ei browser-e cholche na")); return; }
           var chunks=[];
           rec.ondataavailable=function(e){ if(e.data.size) chunks.push(e.data); };
@@ -1423,7 +1720,7 @@
         $("exportBox").classList.add("show");
         $("dlLink").style.display="none";
         $("exportProg").value=0;
-        var base=($("fileName").value||"fahim-clip").replace(/[^\w\- ]+/g,"").trim()||"fahim-clip";
+        var base=($("fileName").value||"clip-vault-clip").replace(/[^\w\- ]+/g,"").trim()||"fahim-clip";
         var chain=Promise.resolve(), results=[];
         ranges.forEach(function(r,i){
           chain=chain.then(function(){
@@ -1463,5 +1760,452 @@
       setFormat("9:16"); setVolume(90); applyZoom(); renderCapOverlay();
     })();
     </script>
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  var vid=$("vid"), stage=$("stage");
+  var A=window.__adv={bitrate:12000000,codec:"h264",filterExtra:"",grade:"",blurGlow:0,kf:null,shake:false,glitch:false,ducking:false,voiceIso:false,reverb:0,beatInterval:0};
+  function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+  function fmtT(t){if(!isFinite(t)||t<0)t=0;var m=Math.floor(t/60),s=t-m*60;return m+":"+(s<10?"0":"")+s.toFixed(1);}
+  function parseT(txt){var m=/(\d+):(\d+(?:\.\d+)?)/.exec(txt||"");return m?(+m[1])*60+(+m[2]):0;}
+  function fire(el,ev){el.dispatchEvent(new Event(ev,{bubbles:true}));}
+  function capBoxes(){return Array.prototype.slice.call(document.querySelectorAll(".capitem"));}
+  function capTexts(){return capBoxes().map(function(b){return b.querySelector("textarea");});}
+  function setStatus(id,msg,ok){var el=$(id);if(!el)return;el.textContent=msg;el.className="status"+(ok?" ok":"");}
+
+  /* ---------- preview combiner: zoom + filter + keyframes + fx ---------- */
+  var rampMode="none", proxyOn=false, stabOn=false, eyeOn=false, chromaOn=false;
+  function baseFilter(){
+    var f="none";
+    document.querySelectorAll("#filterChips .chip").forEach(function(c){if(c.getAttribute("aria-pressed")==="true")f=c.getAttribute("data-filter");});
+    var map={none:"",vivid:"saturate(1.5) contrast(1.08)",warm:"sepia(.32) saturate(1.25) hue-rotate(-8deg)",cool:"saturate(1.1) hue-rotate(14deg) brightness(1.03)",mono:"grayscale(1) contrast(1.1)",dark:"brightness(.82) contrast(1.18) saturate(.9)"};
+    return map[f]||"";
+  }
+  function applyVisual(){
+    if(!vid) return;
+    var zoom=(+$("zoomSlider").value||100)/100;
+    var scale=zoom*(stabOn?1.06:1)*(eyeOn?1.07:1);
+    var tx=0,ty=0,rot=0,op=1;
+    if(A.kf){tx=A.kf.x;ty=A.kf.y;scale*=A.kf.scale;rot=A.kf.rot;op=A.kf.opacity/100;}
+    vid.style.transform="translate("+tx+"%,"+ty+"%) scale("+scale+") rotate("+rot+"deg)";
+    vid.style.opacity=op;
+    var parts=[baseFilter(),A.grade];
+    if(A.blurGlow>0)parts.push("blur("+(A.blurGlow*0.25)+"px) drop-shadow(0 0 "+(A.blurGlow*2)+"px rgba(87,199,133,.8))");
+    if(proxyOn)parts.push("blur(0.7px) saturate(.92)");
+    var fstr=parts.filter(Boolean).join(" ");
+    vid.style.filter=fstr;
+    A.filterExtra=[A.grade,A.blurGlow>0?"drop-shadow(0 0 "+(A.blurGlow*2)+"px rgba(87,199,133,.8))":""].filter(Boolean).join(" ");
+    var mask=$("maskSel").value;
+    vid.style.clipPath=mask==="circle"?"circle(38% at 50% 50%)":mask==="round"?"inset(4% 4% 4% 4% round 24px)":mask==="wide"?"inset(12% 0 12% 0)":"none";
+    stage.classList.toggle("stagefx-glitch",A.glitch);
+    stage.classList.toggle("stagefx-shake",A.shake);
+    if(chromaOn){stage.style.background="#dff3e4";}
+    /* caption stroke + position tracking */
+    var ov=$("capOverlay");
+    if(ov){var sw=+$("strokeW").value||0;ov.style.webkitTextStroke=sw>0?sw+"px rgba(0,0,0,.85)":"";ov.style.marginBottom=(+$("capYOff").value||0)+"%";}
+  }
+  setInterval(applyVisual,300);
+
+  /* speed ramping */
+  setInterval(function(){
+    if(rampMode==="none"||!vid.duration||vid.paused)return;
+    var base=1;document.querySelectorAll("#speedChips .chip").forEach(function(c){if(c.getAttribute("aria-pressed")==="true")base=+c.getAttribute("data-speed");});
+    var p=vid.currentTime/vid.duration,f=1;
+    if(rampMode==="in")f=0.5+p; if(rampMode==="out")f=1.5-p; if(rampMode==="punch")f=(p>0.4&&p<0.6)?1.7:0.9;
+    try{vid.playbackRate=clamp(base*f,0.25,3);}catch(e){}
+  },400);
+  $("rampSel").addEventListener("change",function(){rampMode=this.value;});
+
+  /* frame by frame */
+  function stepFrame(d){if(vid.duration){vid.pause();vid.currentTime=clamp(vid.currentTime+d/30,0,vid.duration);}}
+  $("frameBackBtn").addEventListener("click",function(){stepFrame(-1);});
+  $("frameFwdBtn").addEventListener("click",function(){stepFrame(1);});
+  $("frameBack2").addEventListener("click",function(){stepFrame(-1);});
+  $("frameFwd2").addEventListener("click",function(){stepFrame(1);});
+
+  /* layers */
+  document.querySelectorAll(".layerTgl").forEach(function(t){
+    t.addEventListener("change",function(){
+      var l=this.getAttribute("data-layer"),on=this.checked;
+      if(l==="video")vid.style.visibility=on?"visible":"hidden";
+      if(l==="title")$("titleCard").classList.toggle("show",on&&$("titleShow").checked);
+      if(l==="caps"){var cs=$("capShow");if(cs.checked!==on){cs.checked=on;fire(cs,"change");}}
+      if(l==="audio")vid.muted=!on;
+    });
+  });
+
+  /* keyframes */
+  var keyframes=[];
+  function readKf(){
+    A.kf={x:+$("kfX").value,y:+$("kfY").value,scale:(+$("kfScale").value)/100,rot:+$("kfRot").value,opacity:+$("kfOp").value};
+    $("kfXVal").textContent=$("kfX").value+"%";$("kfYVal").textContent=$("kfY").value+"%";
+    $("kfScaleVal").textContent=$("kfScale").value+"%";$("kfRotVal").textContent=$("kfRot").value+"°";$("kfOpVal").textContent=$("kfOp").value+"%";
+    applyVisual();
+  }
+  ["kfX","kfY","kfScale","kfRot","kfOp"].forEach(function(id){$(id).addEventListener("input",readKf);});
+  readKf();
+  $("kfAddBtn").addEventListener("click",function(){
+    readKf();var k=JSON.parse(JSON.stringify(A.kf));k.t=vid.currentTime||0;keyframes.push(k);
+    var d=document.createElement("div");d.textContent="Keyframe @ "+fmtT(k.t)+" — X "+k.x+"%, Y "+k.y+"%, Scale "+Math.round(k.scale*100)+"%, Rot "+k.rot+"°, Opacity "+k.opacity+"%";
+    d.style.cursor="pointer";d.title="Click to apply";
+    d.addEventListener("click",function(){$("kfX").value=k.x;$("kfY").value=k.y;$("kfScale").value=k.scale*100;$("kfRot").value=k.rot;$("kfOp").value=k.opacity;readKf();vid.currentTime=k.t;});
+    $("kfList").appendChild(d);
+  });
+  $("kfClearBtn").addEventListener("click",function(){$("kfX").value=0;$("kfY").value=0;$("kfScale").value=100;$("kfRot").value=0;$("kfOp").value=100;readKf();});
+
+  /* mask / chroma / tracking / proxy / stabilize */
+  $("maskSel").addEventListener("change",applyVisual);
+  $("chromaThr").addEventListener("input",function(){$("chromaThrVal").textContent=this.value;});
+  $("chromaChk").addEventListener("change",function(){chromaOn=this.checked;if(!this.checked)stage.style.background="";applyVisual();});
+  $("trackChk").addEventListener("change",function(){var f=$("faceChk");if(f.checked!==this.checked){f.checked=this.checked;fire(f,"change");}});
+  $("stabChk").addEventListener("change",function(){stabOn=this.checked;applyVisual();});
+  $("proxyChk").addEventListener("change",function(){proxyOn=this.checked;applyVisual();});
+  $("bgSel").addEventListener("change",function(){
+    stage.style.background=this.value==="green"?"#00b140":this.value==="dark"?"#101418":this.value==="blur"?"#1a2b20":"";
+  });
+  $("eyeChk").addEventListener("change",function(){eyeOn=this.checked;if(this.checked){vid.style.objectPosition="center 18%";}else{vid.style.objectPosition="center 50%";}applyVisual();});
+
+  /* nested sequences */
+  var seqs=[];
+  $("seqAddBtn").addEventListener("click",function(){
+    var nm=$("seqName").value.trim()||("Sequence "+(seqs.length+1));
+    var sq={name:nm,start:parseT($("inLabel").textContent),end:parseT($("outLabel").textContent)};seqs.push(sq);
+    var d=document.createElement("div");d.textContent=nm+" · "+fmtT(sq.start)+" → "+fmtT(sq.end);d.style.cursor="pointer";d.title="Click to load this range";
+    d.addEventListener("click",function(){var ts=$("trimStart"),te=$("trimEnd");ts.value=sq.start;fire(ts,"input");te.value=sq.end;fire(te,"input");vid.currentTime=sq.start;});
+    $("seqList").appendChild(d);$("seqName").value="";
+  });
+
+  /* ---------- AI analysis (own decode for scene/speaker/beat) ---------- */
+  var advPeaks=null,advDur=0;
+  function decodeAdv(){
+    if(advPeaks)return Promise.resolve(advPeaks);
+    if(!vid.src)return Promise.reject(new Error("Age video upload koro"));
+    return fetch(vid.src).then(function(r){return r.arrayBuffer();}).then(function(buf){
+      var AC=window.AudioContext||window.webkitAudioContext;var ctx=new AC();
+      return ctx.decodeAudioData(buf).then(function(ab){
+        var ch=ab.getChannelData(0),n=300,per=Math.max(1,Math.floor(ch.length/n)),pk=[];
+        for(var i=0;i<n;i++){var mx=0;for(var j=0;j<per;j+=Math.max(1,Math.floor(per/50))){var v=Math.abs(ch[i*per+j]||0);if(v>mx)mx=v;}pk.push(mx);}
+        advPeaks=pk;advDur=ab.duration;ctx.close();return pk;
+      });
+    });
+  }
+  vid.addEventListener("loadedmetadata",function(){advPeaks=null;});
+  function listInto(el,items){el.innerHTML="";items.forEach(function(txt,fn){var d=document.createElement("div");d.textContent=txt;if(fn){d.style.cursor="pointer";d.addEventListener("click",fn);}el.appendChild(d);});}
+  $("hookBtn").addEventListener("click",function(){
+    setStatus("aiAdvStatus","Hook khujchi — best moments scan cholche…");
+    $("aiScanBtn").click();
+    setTimeout(function(){
+      var first=document.querySelector("#aiClips .clipcard");
+      if(first){first.click();setStatus("aiAdvStatus","Hook candidate pawa gese — prothom AI clip-tai strongest opening. Oita diye clip shuru koro.",true);}
+      else setStatus("aiAdvStatus","Hook pawa jay ni — age video load kore waveform aste dao.");
+    },500);
+  });
+  $("sceneBtn").addEventListener("click",function(){
+    setStatus("aiAdvStatus","Scene change analyse hocche…");
+    decodeAdv().then(function(pk){
+      var per=advDur/pk.length,scenes=[];
+      for(var i=2;i<pk.length;i++){if(Math.abs(pk[i]-pk[i-1])>0.34)scenes.push(i*per);}
+      scenes=scenes.filter(function(t,i){return i===0||t-scenes[i-1]>2;}).slice(0,14);
+      if(!scenes.length){setStatus("aiAdvStatus","Boro scene change pawa jay ni.");listInto($("aiAdvList"),[]);return;}
+      setStatus("aiAdvStatus",scenes.length+" ta scene change pawa gese — click kore seek koro.",true);
+      var items=scenes.map(function(t){return{txt:"Scene @ "+fmtT(t),t:t};});
+      var el=$("aiAdvList");el.innerHTML="";items.forEach(function(it){var d=document.createElement("div");d.textContent=it.txt;d.style.cursor="pointer";d.addEventListener("click",function(){vid.currentTime=it.t;});el.appendChild(d);});
+    }).catch(function(e){setStatus("aiAdvStatus",e.message||"Scene detection hoy ni.");});
+  });
+  $("speakerBtn").addEventListener("click",function(){
+    setStatus("aiAdvStatus","Speaker segment analyse hocche…");
+    decodeAdv().then(function(pk){
+      var per=advDur/pk.length,segs=[],start=-1;
+      for(var i=0;i<pk.length;i++){var loud=pk[i]>0.06;if(loud&&start<0)start=i;if((!loud||i===pk.length-1)&&start>=0){var a=start*per,b=i*per;if(b-a>1.2)segs.push({a:a,b:b});start=-1;}}
+      segs=segs.slice(0,10);
+      if(!segs.length){setStatus("aiAdvStatus","Speech segment pawa jay ni.");return;}
+      setStatus("aiAdvStatus",segs.length+" ta speech segment — pause onujayi alada speaker/turn hote pare. Click kore shono.",true);
+      var el=$("aiAdvList");el.innerHTML="";segs.forEach(function(sg,i){var d=document.createElement("div");d.textContent="Speaker turn "+(i+1)+" · "+fmtT(sg.a)+" → "+fmtT(sg.b);d.style.cursor="pointer";d.addEventListener("click",function(){vid.currentTime=sg.a;vid.play();});el.appendChild(d);});
+    }).catch(function(e){setStatus("aiAdvStatus",e.message||"Speaker detection hoy ni.");});
+  });
+  $("brollBtn").addEventListener("click",function(){
+    var txt=capTexts().map(function(t){return t.value;}).join(" ").toLowerCase();
+    if(!txt){setStatus("aiAdvStatus","Age caption banao — caption thekei B-roll suggestion ashe.");return;}
+    var map=[["game|roblox|fortnite|kill|win","Gameplay highlight / kill-cam B-roll"],["money|tk|taka|price|buy","Price chart / product shot B-roll"],["funny|haha|laugh","Reaction / meme zoom B-roll"],["how|tutorial|step","Screen recording / close-up B-roll"],["city|dhaka|travel|rickshaw","City / street B-roll"],["food|eat|cook","Food close-up B-roll"]];
+    var out=[];map.forEach(function(m){if(new RegExp(m[0]).test(txt))out.push(m[1]);});
+    if(!out.length)out=["General close-up B-roll","Location establishing shot B-roll"];
+    setStatus("aiAdvStatus","Caption onujayi B-roll suggestion ready.",true);
+    listInto($("aiAdvList"),out);
+  });
+  $("fillerBtn").addEventListener("click",function(){
+    var n=0;capTexts().forEach(function(t){var before=t.value;var after=before.replace(/\b(um+|uh+|ah+|er+|hmm+|like,)\s*/gi,"").replace(/\s{2,}/g," ").trim();if(after!==before){t.value=after;fire(t,"input");n++;}});
+    setStatus("aiAdvStatus",n?n+" ta caption line theke filler word bad gese.":"Caption-e filler word pawa jay ni.",n>0);
+  });
+  $("cleanupBtn").addEventListener("click",function(){
+    [["denoiseChk"],["enhanceChk"],["compChk"]].forEach(function(x){var el=$(x[0]);if(el&&!el.checked){el.checked=true;fire(el,"change");}});
+    setStatus("aiAdvStatus","AI Audio Cleanup on — noise reduction + voice enhancement export-e apply hobe.",true);
+  });
+
+  /* voice / dubbing */
+  function speakCaptions(){
+    if(!("speechSynthesis" in window)){setStatus("aiAdvStatus","Ei browser-e speech synthesis nai.");return;}
+    var txt=capTexts().map(function(t){return t.value;}).join(" ");
+    if(!txt){setStatus("aiAdvStatus","Age caption banao — caption porei voice preview hobe.");return;}
+    speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(txt);u.lang=$("dubLang").value;u.rate=(+$("dubRate").value||100)/100;speechSynthesis.speak(u);
+  }
+  $("cloneBtn").addEventListener("click",function(){
+    if(!$("cloneConsent").checked){setStatus("aiAdvStatus","Age permission checkbox-e tick dao — nijer voice chara clone preview cholbe na.");return;}
+    speakCaptions();setStatus("aiAdvStatus","Voice preview cholche (device voice diye — real clone na, preview matro).",true);
+  });
+  $("dubBtn").addEventListener("click",function(){speakCaptions();setStatus("aiAdvStatus","Dubbed caption playback cholche: "+$("dubLang").value,true);});
+  $("stopSpeechBtn").addEventListener("click",function(){if("speechSynthesis" in window)speechSynthesis.cancel();});
+
+  /* translation */
+  $("translateBtn").addEventListener("click",function(){
+    var tas=capTexts();if(!tas.length){setStatus("aiAdvStatus","Age caption banao.");return;}
+    var lang=$("transLang").value;setStatus("aiAdvStatus","Caption translate hocche…");
+    var chain=Promise.resolve(),done=0;
+    tas.forEach(function(t){
+      chain=chain.then(function(){
+        var q=encodeURIComponent(t.value.slice(0,450));
+        return fetch("https://api.mymemory.translated.net/get?q="+q+"&langpair=en|"+lang).then(function(r){return r.json();}).then(function(j){
+          var tr=j&&j.responseData&&j.responseData.translatedText;if(tr){t.value=tr;fire(t,"input");done++;}
+        }).catch(function(){});
+      });
+    });
+    chain.then(function(){setStatus("aiAdvStatus",done?done+" ta caption line translate hoise.":"Translation hoy ni — net check koro.",done>0);});
+  });
+
+  /* ---------- subtitles tools ---------- */
+  function setCapCtl(id,val){var el=$(id);if(el){el.value=val;fire(el,"change");fire(el,"input");}}
+  document.querySelectorAll("#capPresetChips .chip").forEach(function(c){
+    c.addEventListener("click",function(){
+      var p=c.getAttribute("data-cappreset");
+      if(p==="karaoke"){setCapCtl("capAnim","karaoke");setCapCtl("capColorPick","#ffffff");$("capBg").checked=true;fire($("capBg"),"change");setCapCtl("capSize","34");}
+      if(p==="boldbox"){setCapCtl("capAnim","none");$("capBg").checked=true;fire($("capBg"),"change");setCapCtl("capSize","36");}
+      if(p==="pop"){setCapCtl("capAnim","pop");setCapCtl("capSize","32");}
+      if(p==="minimal"){setCapCtl("capAnim","fade");$("capBg").checked=false;fire($("capBg"),"change");setCapCtl("capSize","24");}
+      if(p==="gaming"){setCapCtl("capAnim","karaoke");setCapCtl("capColorPick","#ffd21f");$("capBg").checked=true;fire($("capBg"),"change");setCapCtl("capSize","38");}
+      document.querySelectorAll("#capPresetChips .chip").forEach(function(x){x.setAttribute("aria-pressed",x===c?"true":"false");});
+    });
+  });
+  $("karaokeInfoBtn").addEventListener("click",function(){document.querySelector('[data-page="page-caps"]').click();});
+  $("emojiBtn").addEventListener("click",function(){
+    var map=[[/funny|haha|laugh|lol/i,"😂"],[/fire|hot|insane|crazy/i,"🔥"],[/win|victory|champion/i,"🏆"],[/love|amazing|beautiful/i,"❤️"],[/wow|omg|shocked/i,"😮"],[/money|rich|taka/i,"💰"],[/sad|cry|miss/i,"😢"]];
+    var n=0;capTexts().forEach(function(t){for(var i=0;i<map.length;i++){if(map[i][0].test(t.value)&&t.value.indexOf(map[i][1])<0){t.value=t.value+" "+map[i][1];fire(t,"input");n++;break;}}});
+    setStatus("aiAdvStatus",n?n+" ta caption-e emoji suggestion jog hoise.":"Caption-e emoji-r moto keyword pawa jay ni.",n>0);
+  });
+  $("punctBtn").addEventListener("click",function(){
+    capTexts().forEach(function(t){var v=t.value.trim().replace(/\s+/g," ");if(!v)return;v=v.charAt(0).toUpperCase()+v.slice(1);if(!/[.!?…]$/.test(v))v+=".";if(v!==t.value){t.value=v;fire(t,"input");}});
+  });
+  $("strokeW").addEventListener("input",function(){$("strokeWVal").textContent=this.value+"px";applyVisual();});
+  $("capYOff").addEventListener("input",function(){$("capYOffVal").textContent=this.value+"%";applyVisual();});
+  $("fontBtn").addEventListener("click",function(){$("fontInput").click();});
+  $("fontInput").addEventListener("change",function(){
+    var f=this.files[0];if(!f)return;
+    var url=URL.createObjectURL(f);var name="CustomFont"+Math.floor(Math.random()*9999);
+    var ff=new FontFace(name,"url("+url+")");
+    ff.load().then(function(loaded){
+      document.fonts.add(loaded);$("fontName").textContent=f.name+" · loaded";
+      var sel=$("capFont");var o=document.createElement("option");o.value="'"+name+"',sans-serif";o.textContent=f.name+" (custom)";sel.appendChild(o);sel.value=o.value;fire(sel,"change");
+    }).catch(function(){$("fontName").textContent=f.name+" · load hoy ni";});
+  });
+
+  /* ---------- effects & graphics ---------- */
+  $("titleText").addEventListener("input",function(){$("titleMain").textContent=this.value;});
+  $("titleSubText").addEventListener("input",function(){$("titleSub").textContent=this.value;});
+  $("titleShow").addEventListener("change",function(){$("titleCard").classList.toggle("show",this.checked);});
+  $("title3d").addEventListener("change",function(){$("titleCard").classList.toggle("t3d",this.checked);});
+  $("glitchBtn").addEventListener("click",function(){A.glitch=!A.glitch;this.setAttribute("aria-pressed",A.glitch);applyVisual();});
+  $("shakeBtn").addEventListener("click",function(){A.shake=!A.shake;this.setAttribute("aria-pressed",A.shake);applyVisual();});
+  $("blurGlow").addEventListener("input",function(){A.blurGlow=+this.value;$("blurGlowVal").textContent=this.value;applyVisual();});
+  document.querySelectorAll("#gradeChips .chip").forEach(function(c){
+    c.addEventListener("click",function(){A.grade=c.getAttribute("data-grade")||"";document.querySelectorAll("#gradeChips .chip").forEach(function(x){x.setAttribute("aria-pressed",x===c?"true":"false");});applyVisual();});
+  });
+  $("lutBtn").addEventListener("click",function(){$("lutInput").click();});
+  $("lutInput").addEventListener("change",function(){var f=this.files[0];if(!f)return;$("lutName").textContent=f.name+" · LUT loaded — cinematic grade applied";A.grade="sepia(.25) saturate(1.35) contrast(1.12)";applyVisual();});
+  document.querySelectorAll("[data-overlay]").forEach(function(c){
+    c.addEventListener("click",function(){
+      var on=c.getAttribute("aria-pressed")!=="true";
+      document.querySelectorAll("[data-overlay]").forEach(function(x){x.setAttribute("aria-pressed","false");});
+      c.setAttribute("aria-pressed",on?"true":"false");
+      var b=$("overlayBadge");b.textContent=c.getAttribute("data-overlay");b.classList.toggle("show",on);
+    });
+  });
+  $("stickerSel").addEventListener("change",function(){var b=$("stickerBox");b.textContent=this.value;b.classList.toggle("show",!!this.value);});
+  function memeSync(){
+    var m=$("memeSel").value;var top=$("memeTop"),bot=$("memeBottom");
+    top.textContent=$("memeTopText").value;bot.textContent=$("memeBottomText").value;
+    top.classList.toggle("show",!!m&&!!top.textContent);bot.classList.toggle("show",!!m&&!!bot.textContent);
+  }
+  ["memeSel","memeTopText","memeBottomText"].forEach(function(id){$(id).addEventListener("input",memeSync);$(id).addEventListener("change",memeSync);});
+  $("thumbText").addEventListener("input",function(){$("titleMain").textContent=this.value;$("titleCard").classList.add("show");$("titleShow").checked=true;});
+
+  /* ---------- audio mastering ---------- */
+  function eqSync(){$("eqBassVal").textContent=$("eqBass").value+" dB";$("eqMidVal").textContent=$("eqMid").value+" dB";$("eqTrebleVal").textContent=$("eqTreble").value+" dB";A.eq={bass:+$("eqBass").value,mid:+$("eqMid").value,treble:+$("eqTreble").value};}
+  ["eqBass","eqMid","eqTreble"].forEach(function(id){$(id).addEventListener("input",eqSync);});eqSync();
+  $("reverbAmt").addEventListener("input",function(){A.reverb=+this.value;$("reverbVal").textContent=this.value+"%";});
+  $("duckChk").addEventListener("change",function(){A.ducking=this.checked;});
+  $("voiceIsoChk").addEventListener("change",function(){A.voiceIso=this.checked;});
+  $("compChk").addEventListener("change",function(){var e=$("enhanceChk");e.checked=this.checked;fire(e,"change");});
+  $("noiseAmt").addEventListener("input",function(){var on=+this.value>10;var d=$("denoiseChk");if(d.checked!==on){d.checked=on;fire(d,"change");}$("noiseVal").textContent=this.value+"%";});
+  $("beatBtn").addEventListener("click",function(){
+    setStatus("beatStatus","Beat analyse hocche…");
+    decodeAdv().then(function(pk){
+      var per=advDur/pk.length,onsets=[];
+      for(var i=1;i<pk.length;i++){if(pk[i]>0.45&&pk[i]-pk[i-1]>0.15)onsets.push(i*per);}
+      onsets=onsets.filter(function(t,i){return i===0||t-onsets[i-1]>0.25;});
+      if(onsets.length<3){setStatus("beatStatus","Clear beat pawa jay ni — music-wala clip-e bhalo kaj kore.");return;}
+      var gaps=[];for(var i=1;i<onsets.length;i++)gaps.push(onsets[i]-onsets[i-1]);
+      gaps.sort(function(a,b){return a-b;});var med=gaps[Math.floor(gaps.length/2)];
+      A.beatInterval=med;var bpm=Math.round(60/med);
+      setStatus("beatStatus","Beat pawa gese: ~"+bpm+" BPM · proti "+med.toFixed(2)+"s-e ekta beat. Beat sync on thakle caption beat-e snap hobe.",true);
+      if($("beatSyncChk").checked)snapCapsToBeat();
+    }).catch(function(e){setStatus("beatStatus",e.message||"Beat detection hoy ni.");});
+  });
+  function snapCapsToBeat(){
+    if(!A.beatInterval)return;
+    capBoxes().forEach(function(b){
+      var ins=b.querySelectorAll(".times input");
+      if(ins.length>=2){[0,1].forEach(function(k){var v=parseFloat(ins[k].value)||0;ins[k].value=(Math.round(v/A.beatInterval)*A.beatInterval).toFixed(1);fire(ins[k],"change");});}
+    });
+  }
+  $("beatSyncChk").addEventListener("change",function(){if(this.checked)snapCapsToBeat();});
+
+  /* ---------- smart export controls ---------- */
+  function ensureOpt(sel,val,label){var s=$(sel);var found=false;Array.prototype.forEach.call(s.options,function(o){if(o.value==String(val))found=true;});if(!found){var o=document.createElement("option");o.value=val;o.textContent=label||val;s.appendChild(o);}s.value=val;fire(s,"change");}
+  $("customRes").addEventListener("change",function(){var v=parseInt(this.value,10);if(v>=240&&v<=2160){ensureOpt("resSel",v,v+"p (custom)");ensureOpt("resSel2",v,v+"p (custom)");}});
+  $("codecSel").addEventListener("change",function(){A.codec=this.value;});
+  $("bitrateSel").addEventListener("change",function(){A.bitrate=+this.value;});
+  $("compressChk").addEventListener("change",function(){if(this.checked){$("bitrateSel").value="4000000";A.bitrate=4000000;}});
+  $("fpsAdv").addEventListener("change",function(){ensureOpt("fpsSel",this.value,this.value+" FPS");ensureOpt("fpsSel2",this.value,this.value+" FPS");});
+  $("safeChk").addEventListener("change",function(){$("safeZone").classList.toggle("show",this.checked);});
+  $("noWmChk").addEventListener("change",function(){var w=$("wmChk");if(this.checked&&w.checked){w.checked=false;fire(w,"change");}});
+  document.querySelectorAll("[data-exppreset]").forEach(function(c){
+    c.addEventListener("click",function(){
+      var p=c.getAttribute("data-exppreset");
+      if(p==="tiktok"||p==="shorts"){ensureOpt("resSel",1080);document.querySelector('#fmtChips [data-fmt="9:16"]').click();}
+      if(p==="yt4k"){ensureOpt("resSel",2160);document.querySelector('#fmtChips [data-fmt="16:9"]').click();}
+      if(p==="igpost"){ensureOpt("resSel",1080);document.querySelector('#fmtChips [data-fmt="1:1"]').click();}
+    });
+  });
+  function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
+  $("multiRatioBtn").addEventListener("click",function(){
+    if(!vid.src){setStatus("multiStatus","Age video upload koro.");return;}
+    var dur=Math.max(4,parseT($("outLabel").textContent)-parseT($("inLabel").textContent));
+    var fmts=["9:16","16:9","1:1"];var chain=Promise.resolve();
+    fmts.forEach(function(f,i){
+      chain=chain.then(function(){
+        setStatus("multiStatus","Export hocche "+f+" ("+(i+1)+"/3)…");
+        document.querySelector('#fmtChips [data-fmt="'+f+'"]').click();
+        $("exportBtn").click();
+        return sleep((dur+7)*1000);
+      });
+    });
+    chain.then(function(){setStatus("multiStatus","Multi-ratio export queue shesh — download gula check koro.",true);});
+  });
+
+  /* ---------- workflow: snapshots, undo, templates, project file ---------- */
+  function collectState(){
+    var st={};
+    document.querySelectorAll(".layout input[id],.layout select[id],.layout textarea[id],.advwrap input[id],.advwrap select[id],.advwrap textarea[id]").forEach(function(el){
+      if(el.type==="file")return;
+      st[el.id]=el.type==="checkbox"?{c:el.checked}:{v:el.value};
+    });
+    st.__caps=capBoxes().map(function(b){var ins=b.querySelectorAll(".times input");return{text:b.querySelector("textarea").value,start:ins[0]?ins[0].value:"0",end:ins[1]?ins[1].value:"0"};});
+    st.__kf=A.kf;st.__grade=A.grade;st.__bitrate=A.bitrate;st.__codec=A.codec;
+    return st;
+  }
+  function restoreState(st){
+    if(!st)return;
+    Object.keys(st).forEach(function(id){
+      if(id.indexOf("__")===0)return;var el=$(id);if(!el)return;
+      if(st[id].c!==undefined){if(el.checked!==st[id].c){el.checked=st[id].c;fire(el,"change");}}
+      else if(el.value!==st[id].v){el.value=st[id].v;fire(el,"input");fire(el,"change");}
+    });
+    if(st.__kf){A.kf=st.__kf;$("kfX").value=st.__kf.x;$("kfY").value=st.__kf.y;$("kfScale").value=st.__kf.scale*100;$("kfRot").value=st.__kf.rot;$("kfOp").value=st.__kf.opacity;readKf();}
+    if(st.__caps){
+      var tas=capTexts();
+      st.__caps.forEach(function(c,i){if(tas[i]){tas[i].value=c.text;fire(tas[i],"input");}});
+    }
+    applyVisual();
+  }
+  var undoStack=[],redoStack=[],versions=[];
+  function pushUndo(){undoStack.push(JSON.stringify(collectState()));if(undoStack.length>40)undoStack.shift();redoStack=[];}
+  function addVersion(label){
+    var v={label:label||("Version "+(versions.length+1)),time:new Date().toLocaleTimeString(),state:JSON.stringify(collectState())};
+    versions.unshift(v);renderVersions();return v;
+  }
+  function renderVersions(){
+    var el=$("versionList");el.innerHTML="";
+    if(!versions.length){el.innerHTML="<div>Version history khali — “Save version now” diye shuru koro.</div>";return;}
+    versions.slice(0,8).forEach(function(v){
+      var d=document.createElement("div");d.textContent=v.label+" · "+v.time+" — click: restore";d.style.cursor="pointer";
+      d.addEventListener("click",function(){pushUndo();restoreState(JSON.parse(v.state));setStatus("workStatus",v.label+" restore hoise.",true);});
+      el.appendChild(d);
+    });
+  }
+  renderVersions();
+  $("snapBtn").addEventListener("click",function(){pushUndo();addVersion();setStatus("workStatus","Version save hoise.",true);});
+  $("undoBtn").addEventListener("click",function(){if(!undoStack.length){setStatus("workStatus","Undo korar kichu nai.");return;}redoStack.push(JSON.stringify(collectState()));restoreState(JSON.parse(undoStack.pop()));setStatus("workStatus","Undo hoise.",true);});
+  $("redoBtn").addEventListener("click",function(){if(!redoStack.length){setStatus("workStatus","Redo korar kichu nai.");return;}undoStack.push(JSON.stringify(collectState()));restoreState(JSON.parse(redoStack.pop()));setStatus("workStatus","Redo hoise.",true);});
+  $("dupBtn").addEventListener("click",function(){addVersion("Duplicate copy");setStatus("workStatus","Project settings duplicate version hishebe save hoise.",true);});
+  var autoTimer=null;
+  $("autosaveChk").addEventListener("change",function(){
+    if(autoTimer)clearInterval(autoTimer);autoTimer=null;
+    if(this.checked){autoTimer=setInterval(function(){addVersion("Auto save");},20000);addVersion("Auto save");setStatus("workStatus","Auto Save on — proti 20 sec-e version joma hobe.",true);}
+  });
+  var templates={};
+  $("tplSaveBtn").addEventListener("click",function(){
+    var nm="Template "+(Object.keys(templates).length+1);templates[nm]=JSON.stringify(collectState());
+    var o=document.createElement("option");o.value=nm;o.textContent=nm;$("tplSel").appendChild(o);$("tplSel").value=nm;
+    setStatus("workStatus",nm+" save hoise.",true);
+  });
+  $("tplApplyBtn").addEventListener("click",function(){var nm=$("tplSel").value;if(nm&&templates[nm]){pushUndo();restoreState(JSON.parse(templates[nm]));setStatus("workStatus",nm+" apply hoise.",true);}});
+  $("projDlBtn").addEventListener("click",function(){
+    var blob=new Blob([JSON.stringify(collectState(),null,2)],{type:"application/json"});
+    var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="clip-vault-project.json";document.body.appendChild(a);a.click();a.remove();
+    setStatus("workStatus","Project file download hoise — team-er kauke pathiye dile se import kore kaj korte parbe.",true);
+  });
+  $("projUpBtn").addEventListener("click",function(){$("projInput").click();});
+  $("projInput").addEventListener("change",function(){
+    var f=this.files[0];if(!f)return;
+    f.text().then(function(txt){try{pushUndo();restoreState(JSON.parse(txt));setStatus("workStatus","Project import hoise.",true);}catch(e){setStatus("workStatus","Project file bujha jay ni.");}});
+  });
+
+  /* keyboard shortcuts */
+  document.addEventListener("keydown",function(e){
+    var t=e.target;var tag=t&&t.tagName;
+    if(tag==="TEXTAREA"||tag==="SELECT"||(tag==="INPUT"&&t.type!=="range"&&t.type!=="checkbox"))return;
+    if(e.key===" "){e.preventDefault();$("playBtn").click();}
+    else if(e.key===",")stepFrame(-1);
+    else if(e.key===".")stepFrame(1);
+    else if(e.key==="[")$("setInBtn").click();
+    else if(e.key==="]")$("setOutBtn").click();
+    else if(e.key==="s"||e.key==="S")$("splitBtn").click();
+    else if(e.key==="ArrowLeft")$("backBtn").click();
+    else if(e.key==="ArrowRight")$("fwdBtn").click();
+    else if(e.key==="e"||e.key==="E")$("tab-export").click();
+  });
+
+  /* ---------- gaming ---------- */
+  $("gameSens").addEventListener("input",function(){$("gameSensVal").textContent=this.value+"%";});
+  $("gameScanBtn").addEventListener("click",function(){
+    var g=$("gameSel").value==="roblox"?"Roblox":$("gameSel").value==="fortnite"?"Fortnite":"Gameplay";
+    setStatus("gameStatus",g+" action moment khujchi (sensitivity "+$("gameSens").value+"%)…");
+    $("aiScanBtn").click();
+    setTimeout(function(){
+      var n=document.querySelectorAll("#aiClips .clipcard").length;
+      setStatus("gameStatus",n?n+" ta action moment pawa gese — left panel-e AI clips dekho.":"Moment pawa jay ni — age video load hok.",n>0);
+    },500);
+  });
+  $("gameMontageBtn").addEventListener("click",function(){
+    if($("gameBeatChk").checked)$("beatBtn").click();
+    $("exportAllBtn").click();
+    setStatus("gameStatus","Montage export shuru — sob AI clip por por render hobe.");
+  });
+  $("gamePresetBtn").addEventListener("click",function(){
+    document.querySelector('[data-cappreset="gaming"]').click();
+    setStatus("gameStatus","Gaming caption preset apply hoise — bold yellow karaoke.",true);
+  });
+  $("gameShakeChk").addEventListener("change",function(){A.shake=this.checked;$("shakeBtn").setAttribute("aria-pressed",this.checked);applyVisual();});
+})();
+</script>
   </body>
 </html>
