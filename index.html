@@ -1369,7 +1369,11 @@
           if(T>0){
             var pct=Math.min(100, Math.round(L/T*100));
             $("dlProg").value=pct;
-            $("dlProgText").textContent="Model download hocche — "+fmtSize(L)+" / "+fmtSize(T)+" ("+pct+"%)";
+            if(pct>=100){
+              $("dlProgText").textContent="Download shesh — "+fmtSize(T)+" (100%). Model ready hocche, ektu wait koro…";
+            }else{
+              $("dlProgText").textContent="Model download hocche — "+fmtSize(L)+" / "+fmtSize(T)+" ("+pct+"%)";
+            }
           }else{
             $("dlProgText").textContent="Model download hocche — "+f+"…";
           }
@@ -1402,9 +1406,24 @@
             T.env.allowRemoteModels=true;
             if(T.env.backends && T.env.backends.onnx && T.env.backends.onnx.wasm){
               T.env.backends.onnx.wasm.numThreads=1;
+              /* CRITICAL: ort (onnxruntime-web) finds its .wasm runtime files
+                 via document.currentScript, which is null for a dynamic
+                 import() — so wasmPaths stays undefined, the WASM worker
+                 never starts, and pipeline() hangs FOREVER right after the
+                 model download hits 100%: no captions, no error (that was
+                 this bug). Point it at the dist folder on the CDN, where
+                 ort-wasm*.wasm actually live. */
+              T.env.backends.onnx.wasm.wasmPaths="https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/";
             }
           }catch(e){}
-          return T.pipeline("automatic-speech-recognition","Xenova/whisper-tiny.en",{ progress_callback:dlProgress });
+          var pipePromise=T.pipeline("automatic-speech-recognition","Xenova/whisper-tiny.en",{ progress_callback:dlProgress });
+          /* Watchdog: if session creation ever stalls again, fail loudly
+             with a message + reset state instead of hanging silently with
+             the button disabled. */
+          var watchdog=new Promise(function(_,reject){
+            setTimeout(function(){ reject(new Error("Model ready hote onek beshi somoy lagche — page-ta reload kore abar try koro.")); },240000);
+          });
+          return Promise.race([pipePromise,watchdog]);
         }).then(function(pipe){
           S.whisperPipe=pipe;
           $("dlProgWrap").style.display="none";
