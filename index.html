@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
-    <link rel="icon" href="data:," />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjNGNjNDdlIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzFlN2E0NSIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgPHJlY3QgeD0iMiIgeT0iMiIgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiByeD0iMTYiIGZpbGw9InVybCgjZykiLz4KICA8cmVjdCB4PSIzLjUiIHk9IjMuNSIgd2lkdGg9IjU3IiBoZWlnaHQ9IjU3IiByeD0iMTQuNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZmZmZmIiBzdHJva2Utb3BhY2l0eT0iLjMwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8Y2lyY2xlIGN4PSIzMiIgY3k9IjMyIiByPSIxNi41IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iNCIvPgogIDxjaXJjbGUgY3g9IjMyIiBjeT0iMTUuNSIgcj0iMi40IiBmaWxsPSIjZmZmZmZmIi8+CiAgPGNpcmNsZSBjeD0iMTcuNyIgY3k9IjQwLjMiIHI9IjIuNCIgZmlsbD0iI2ZmZmZmZiIvPgogIDxjaXJjbGUgY3g9IjQ2LjMiIGN5PSI0MC4zIiByPSIyLjQiIGZpbGw9IiNmZmZmZmYiLz4KICA8cGF0aCBkPSJNMjcuNSAyNC44IEw0MSAzMiBMMjcuNSAzOS4yIFoiIGZpbGw9IiNmZmZmZmYiLz4KPC9zdmc+Cg==" />
     <title>Clip Vault by Fahim — Clip Editor</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -87,8 +87,9 @@
         flex:none;display:flex;align-items:center;gap:10px;flex-wrap:wrap;
         padding:8px 12px;background:var(--panel);border-bottom:1px solid var(--line);z-index:40;
       }
-      .brand{font-weight:900;font-size:19px;letter-spacing:-.02em;white-space:nowrap}
+      .brand{display:flex;align-items:center;gap:9px;font-weight:900;font-size:19px;letter-spacing:-.02em;white-space:nowrap}
       .brand em{font-style:normal;color:var(--accent)}
+      .brandmark{width:34px;height:34px;flex:none;display:block;filter:drop-shadow(0 1px 3px rgba(21,60,35,.28))}
       #projName{
         border-color:transparent;background:transparent;font-weight:700;font-size:14px;
         width:170px;min-height:34px;padding:5px 8px;
@@ -259,6 +260,7 @@
         .props{width:auto;border-left:0;border-top:1px solid var(--line);overflow:visible}
         .timelinebar{position:static}
         .brand{font-size:16px}
+        .brandmark{width:29px;height:29px}
         #projName{width:120px}
         .stage[data-fmt="9:16"]{max-width:290px}
         .tl-row{grid-template-columns:56px 1fr}
@@ -269,7 +271,7 @@
   <body>
     <!-- ================= TOP BAR ================= -->
     <header class="topbar">
-      <span class="brand">CLIP VAULT<em> by Fahim</em></span>
+      <span class="brand"><img class="brandmark" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjNGNjNDdlIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzFlN2E0NSIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgPHJlY3QgeD0iMiIgeT0iMiIgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiByeD0iMTYiIGZpbGw9InVybCgjZykiLz4KICA8cmVjdCB4PSIzLjUiIHk9IjMuNSIgd2lkdGg9IjU3IiBoZWlnaHQ9IjU3IiByeD0iMTQuNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZmZmZmIiBzdHJva2Utb3BhY2l0eT0iLjMwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8Y2lyY2xlIGN4PSIzMiIgY3k9IjMyIiByPSIxNi41IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iNCIvPgogIDxjaXJjbGUgY3g9IjMyIiBjeT0iMTUuNSIgcj0iMi40IiBmaWxsPSIjZmZmZmZmIi8+CiAgPGNpcmNsZSBjeD0iMTcuNyIgY3k9IjQwLjMiIHI9IjIuNCIgZmlsbD0iI2ZmZmZmZiIvPgogIDxjaXJjbGUgY3g9IjQ2LjMiIGN5PSI0MC4zIiByPSIyLjQiIGZpbGw9IiNmZmZmZmYiLz4KICA8cGF0aCBkPSJNMjcuNSAyNC44IEw0MSAzMiBMMjcuNSAzOS4yIFoiIGZpbGw9IiNmZmZmZmYiLz4KPC9zdmc+Cg==" alt="" width="34" height="34" /><span>CLIP VAULT<em> by Fahim</em></span></span>
       <input type="text" id="projName" value="Untitled clip" aria-label="Project name" title="Project name — click to rename" />
       <div class="sep" aria-hidden="true"></div>
       <button class="iconbtn" id="undoBtn" type="button" aria-label="Undo" title="Undo" disabled>
