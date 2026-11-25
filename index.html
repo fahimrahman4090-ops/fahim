@@ -141,7 +141,8 @@
       .stage[data-fmt="9:16"]{aspect-ratio:9/16;max-width:330px}
       .stage[data-fmt="16:9"]{aspect-ratio:16/9;max-width:720px}
       .stage[data-fmt="1:1"]{aspect-ratio:1/1;max-width:460px}
-      .stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000}
+      .stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000;cursor:grab}
+      .stage video:active{cursor:grabbing}
       .stage .empty{
         position:absolute;inset:0;display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;
         color:var(--stage-ink);text-align:center;padding:20px;z-index:1;
@@ -387,6 +388,10 @@
           <div class="stack">
             <button class="btn primary big" id="autoCapBtn" type="button" disabled>Generate auto captions</button>
             <p class="status" id="capStatus" role="status"></p>
+            <div id="dlProgWrap" style="display:none">
+              <progress id="dlProg" value="0" max="100" style="width:100%"></progress>
+              <p class="tiny" id="dlProgText" style="margin-top:4px">Model download hocche…</p>
+            </div>
           </div>
           <h3>Na hole — transcript</h3>
           <p class="sub" style="margin-bottom:6px">Nijer transcript thakle paste koro, clip-er somoy onujayi line vag hoye jabe.</p>
@@ -462,6 +467,21 @@
           <div class="field">
             <label for="zoomSlider">Zoom <span class="val" id="zoomVal">100%</span></label>
             <input type="range" id="zoomSlider" min="100" max="300" value="100" />
+          </div>
+          <h3>Video position</h3>
+          <p class="sub" style="margin-bottom:6px">Video frame-er bhitore beshi niche ba upore thakle ekhan theke soriye thik koro — preview-te video-ta drag koreo sorano jay. Preview ar export dutotei apply hoy.</p>
+          <div class="field">
+            <label for="posYSlider">Niche – Upore <span class="val" id="posYVal">50%</span></label>
+            <input type="range" id="posYSlider" min="0" max="100" value="50" />
+          </div>
+          <div class="field">
+            <label for="posXSlider">Bame – Dane <span class="val" id="posXVal">50%</span></label>
+            <input type="range" id="posXSlider" min="0" max="100" value="50" />
+          </div>
+          <div class="row">
+            <button class="btn small" id="posUpBtn" type="button">↑ Upore tolo</button>
+            <button class="btn small" id="posDownBtn" type="button">↓ Niche namo</button>
+            <button class="btn small" id="posResetBtn" type="button">Majhkhane reset</button>
           </div>
           <label class="check"><input type="checkbox" id="faceChk" /> <span>Face-priority crop<small>Crop-ta frame-er uporer dike bias kore — talking-head video-te mukh shadharonoto uporei thake. Eta automatic face detection na.</small></span></label>
         </section>
@@ -554,7 +574,7 @@
       /* ---------------- state ---------------- */
       var S = {
         url:null, name:"", duration:0, vw:0, vh:0,
-        inT:0, outT:0, speed:1, zoom:1, filter:"none", transition:"fade",
+        inT:0, outT:0, speed:1, zoom:1, posX:50, posY:50, filter:"none", transition:"fade",
         fmt:"9:16",
         segments:[], silences:[], aiClips:[],
         captions:[], texts:[], textSeq:0,
@@ -604,7 +624,7 @@
       var undoStack=[], redoStack=[];
       function snapshot(){
         return JSON.stringify({
-          inT:S.inT, outT:S.outT, speed:S.speed, zoom:S.zoom, filter:S.filter,
+          inT:S.inT, outT:S.outT, speed:S.speed, zoom:S.zoom, posX:S.posX, posY:S.posY, filter:S.filter,
           transition:S.transition, fmt:S.fmt, capY:S.capY,
           segments:S.segments, captions:S.captions, texts:S.texts, textSeq:S.textSeq
         });
@@ -623,12 +643,13 @@
         try{
           var o=JSON.parse(snap);
           S.inT=o.inT; S.outT=o.outT; S.speed=o.speed; S.zoom=o.zoom; S.filter=o.filter;
+          S.posX=(typeof o.posX==="number")?o.posX:50; S.posY=(typeof o.posY==="number")?o.posY:50;
           S.transition=o.transition; S.capY=o.capY; S.segments=o.segments||[];
           S.captions=o.captions||[]; S.texts=o.texts||[]; S.textSeq=o.textSeq||0;
           S.sel={type:null,index:-1};
           setFormat(o.fmt||"9:16", true);
           vid.playbackRate=S.speed;
-          $("zoomSlider").value=Math.round(S.zoom*100); applyZoom(); applyFilter(); syncTransChips(); syncFilterChips();
+          $("zoomSlider").value=Math.round(S.zoom*100); applyZoom(); applyPos(); applyFilter(); syncTransChips(); syncFilterChips();
           syncTrimUI(); renderAll();
         }catch(e){}
         syncUndoBtns();
@@ -669,6 +690,7 @@
         $("fileMeta").style.display = "block";
         S.segments = []; S.silences = []; S.aiClips = []; S.captions = []; S.texts = [];
         S.sel={type:null,index:-1}; S.peaks=null; S.capY=null;
+        S.posX=50; S.posY=50; $("faceChk").checked=false; applyPos();
         undoStack=[]; redoStack=[]; syncUndoBtns();
         $("aiClips").innerHTML=""; $("silenceList").innerHTML=""; $("aiStatus").textContent="";
         $("capStatus").textContent=""; $("exportAllBtn").style.display="none";
@@ -825,12 +847,63 @@
       }
       window.addEventListener("resize", function(){ updatePlayhead(); drawWave(); renderTextOverlays(); });
 
-      /* ---------------- speed / zoom / filter / transition ---------------- */
+      /* ---------------- speed / zoom / position / filter / transition ---------------- */
       function applyZoom(){
         $("zoomVal").textContent=Math.round(S.zoom*100)+"%";
         vid.style.transform="scale("+S.zoom+")";
       }
       $("zoomSlider").addEventListener("input", function(){ S.zoom=+this.value/100; applyZoom(); });
+      /* Video position inside the frame: posX/posY are the object-position /
+         crop-window percentages (50/50 = centred). Preview (object-position +
+         matching transform-origin so zoom stays glued to the same point) and
+         export (drawFrame crop offsets) both read these, so they agree. */
+      function applyPos(){
+        $("posYVal").textContent=Math.round(S.posY)+"%";
+        $("posXVal").textContent=Math.round(S.posX)+"%";
+        if(document.activeElement!==$("posYSlider")) $("posYSlider").value=Math.round(S.posY);
+        if(document.activeElement!==$("posXSlider")) $("posXSlider").value=Math.round(S.posX);
+        vid.style.objectPosition=S.posX+"% "+S.posY+"%";
+        vid.style.transformOrigin=S.posX+"% "+S.posY+"%";
+      }
+      $("posYSlider").addEventListener("input", function(){ S.posY=+this.value; $("faceChk").checked=false; applyPos(); });
+      $("posXSlider").addEventListener("input", function(){ S.posX=+this.value; applyPos(); });
+      $("posUpBtn").addEventListener("click", function(){ pushUndo(); S.posY=clamp(S.posY+10,0,100); $("faceChk").checked=false; applyPos(); });
+      $("posDownBtn").addEventListener("click", function(){ pushUndo(); S.posY=clamp(S.posY-10,0,100); $("faceChk").checked=false; applyPos(); });
+      $("posResetBtn").addEventListener("click", function(){ pushUndo(); S.posX=50; S.posY=50; $("faceChk").checked=false; applyPos(); });
+      /* drag the video itself inside the preview to reposition it */
+      (function(){
+        var dragging=false, moved=false, before=null, startX=0, startY=0, startPX=50, startPY=50;
+        function overflow(){
+          var r=stage.getBoundingClientRect();
+          if(!r.width || !S.vw || !S.vh) return {x:0,y:0};
+          var srcAR=S.vw/S.vh, stAR=r.width/r.height, iw, ih;
+          if(srcAR>stAR){ ih=r.height; iw=r.height*srcAR; } else { iw=r.width; ih=r.width/srcAR; }
+          return { x:Math.max(0,(iw*S.zoom)-r.width), y:Math.max(0,(ih*S.zoom)-r.height) };
+        }
+        vid.addEventListener("pointerdown", function(e){
+          if(!S.url) return;
+          dragging=true; moved=false; before=snapshot();
+          startX=e.clientX; startY=e.clientY; startPX=S.posX; startPY=S.posY;
+          vid.setPointerCapture(e.pointerId);
+        });
+        vid.addEventListener("pointermove", function(e){
+          if(!dragging) return;
+          var ov=overflow(), dx=e.clientX-startX, dy=e.clientY-startY;
+          var nx=startPX, ny=startPY;
+          if(ov.x>0) nx=startPX-(dx/ov.x)*100;
+          if(ov.y>0) ny=startPY-(dy/ov.y)*100;
+          nx=clamp(nx,0,100); ny=clamp(ny,0,100);
+          if(Math.abs(nx-S.posX)+Math.abs(ny-S.posY)>0.3) moved=true;
+          if(moved){ S.posX=nx; S.posY=ny; $("faceChk").checked=false; applyPos(); }
+        });
+        function endDrag(){
+          if(dragging && moved && before){ undoStack.push(before); if(undoStack.length>50) undoStack.shift(); redoStack=[]; syncUndoBtns(); }
+          dragging=false;
+        }
+        vid.addEventListener("pointerup", endDrag);
+        vid.addEventListener("pointercancel", function(){ dragging=false; });
+      })();
+      applyPos();
       function applyFilter(){ vid.style.filter=FILTERS[S.filter]||"none"; }
       function syncFilterChips(){
         document.querySelectorAll("#filterChips .chip").forEach(function(x){ x.setAttribute("aria-pressed", x.getAttribute("data-filter")===S.filter?"true":"false"); });
@@ -844,7 +917,7 @@
       document.querySelectorAll("#transChips .chip").forEach(function(c){
         c.addEventListener("click", function(){ pushUndo(); S.transition=c.getAttribute("data-trans"); syncTransChips(); });
       });
-      $("faceChk").addEventListener("change", function(){ vid.style.objectPosition = this.checked ? "center 22%" : "center 50%"; });
+      $("faceChk").addEventListener("change", function(){ pushUndo(); S.posY = this.checked ? 22 : 50; applyPos(); });
 
       /* ---------------- audio analysis: peaks, AI moments, silence ---------------- */
       function decodePeaks(){
@@ -1276,9 +1349,36 @@
           });
         });
       }
+      /* Live download progress for the Whisper model files: transformers.js
+         reports each file separately, so bytes are summed across files to
+         show "x MB / ~40 MB (n%)" under the Auto Caption button. */
+      var dlFiles={};
+      function dlProgress(data){
+        var wrap=$("dlProgWrap"); if(!wrap || !data) return;
+        if(data.status==="initiate" || data.status==="download" || data.status==="progress" || data.status==="done"){
+          var f=data.file||"model";
+          if(!dlFiles[f]) dlFiles[f]={loaded:0,total:0};
+          if(typeof data.total==="number" && data.total>0) dlFiles[f].total=data.total;
+          if(typeof data.loaded==="number") dlFiles[f].loaded=data.loaded;
+          if(data.status==="done" && dlFiles[f].total>0) dlFiles[f].loaded=dlFiles[f].total;
+          var L=0, T=0, k;
+          for(k in dlFiles){ L+=dlFiles[k].loaded; T+=dlFiles[k].total; }
+          wrap.style.display="block";
+          if(T>0){
+            var pct=Math.min(100, Math.round(L/T*100));
+            $("dlProg").value=pct;
+            $("dlProgText").textContent="Model download hocche — "+fmtSize(L)+" / "+fmtSize(T)+" ("+pct+"%)";
+          }else{
+            $("dlProgText").textContent="Model download hocche — "+f+"…";
+          }
+        }else if(data.status==="ready"){
+          wrap.style.display="none";
+        }
+      }
       function loadWhisper(){
         if(S.whisperPipe) return Promise.resolve(S.whisperPipe);
         if(S._whisperPromise) return S._whisperPromise;
+        dlFiles={};
         /* @xenova/transformers is an ES module — it must be loaded with
            dynamic import(); a classic <script> tag never sets
            window.Transformers (that was the old "AI library load hoy ni" bug). */
@@ -1302,12 +1402,14 @@
               T.env.backends.onnx.wasm.numThreads=1;
             }
           }catch(e){}
-          return T.pipeline("automatic-speech-recognition","Xenova/whisper-tiny.en");
+          return T.pipeline("automatic-speech-recognition","Xenova/whisper-tiny.en",{ progress_callback:dlProgress });
         }).then(function(pipe){
           S.whisperPipe=pipe;
+          $("dlProgWrap").style.display="none";
           return pipe;
         }).catch(function(err){
           S._whisperPromise=null;
+          $("dlProgWrap").style.display="none";
           throw err;
         });
         return S._whisperPromise;
@@ -1477,8 +1579,7 @@
         var targetAR=W/H, srcAR=vw/vh, sw, sh;
         if(srcAR>targetAR){ sh=vh; sw=vh*targetAR; } else { sw=vw; sh=vw/targetAR; }
         sw/=zoom; sh/=zoom;
-        var sx=(vw-sw)/2, sy=(vh-sh)/2;
-        if($("faceChk").checked) sy=(vh-sh)*0.22;
+        var sx=(vw-sw)*(S.posX/100), sy=(vh-sh)*(S.posY/100);
         ctx.save();
         try{ ctx.filter=((FILTERS[S.filter]||"none")==="none"?"":(FILTERS[S.filter]||"")); }catch(e){}
         var tIn=vid.currentTime-S.inT, fade=1;
